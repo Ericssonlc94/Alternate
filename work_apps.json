@@ -16,15 +16,15 @@
         "requires_admin": true
     },
     {
-        "name": "ASSINADOR SERPRO",
-        "path": "C:/Program Files (x86)/Assinador Serpro/exec_assinador.vbs",
-        "close_after_launch": true,
-        "requires_admin": false
-    },
-    {
         "name": "DROPBOX",
         "path": "C:/Program Files (x86)/Dropbox/Client/Dropbox.exe",
         "close_after_launch": true,
         "requires_admin": false
+    },
+    {
+        "name": "ASSINADOR SERPRO",
+        "path": "C:/Program Files (x86)/Assinador Serpro/exec_assinador.vbs",
+        "close_after_launch": false,
+        "requires_admin": true
     }
 ]

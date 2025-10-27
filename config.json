@@ -1,13 +1,13 @@
 {
-    "language": "pt",
+    "language": "en",
     "user_name": "Ericsson",
-    "active_mode": "TRABALHO",
+    "active_mode": "WORK",
     "work_wallpaper": {
-        "path": "C:/Users/ericssonlc/Pictures/Sispec wallpaper negativo fullhd.png",
-        "style": "5"
+        "path": "C:/Users/ericssonlc/Pictures/1345265.png",
+        "style": "2"
     },
     "personal_wallpaper": {
-        "path": "C:/Users/ericssonlc/Pictures/thumb-1920-730044.jpg",
-        "style": "5"
+        "path": "C:/Users/ericssonlc/Pictures/1346866.png",
+        "style": "1"
     }
 }

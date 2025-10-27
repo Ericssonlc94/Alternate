@@ -23,11 +23,11 @@ from rich.live import Live # pyright: ignore[reportMissingImports]
 from rich.align import Align # pyright: ignore[reportMissingImports]
 
 # --- CONSTANTS ---
-STYLE_BG = "on #0a2a4f"
-STYLE_FG = "bright_cyan"
+STYLE_BG = "on #001E29"
+STYLE_FG = "white"
 STYLE_ACCENT = "cyan"
 STYLE_ERROR = "bold red"
-STYLE_MATRIX = "bold green"
+STYLE_MATRIX = "white"
 WORK_DB = "work_apps.json"
 PERSONAL_DB = "personal_apps.json"
 CONFIG_DB = "config.json"
@@ -381,7 +381,7 @@ def manage_processes(apps_to_launch, apps_to_terminate, status):
     apps_to_terminate = [app for app in apps_to_terminate if os.path.normcase(app['path']) not in launch_paths]
 
     # 2. TERMINATION LOGIC
-    status.update(f"[bold yellow]{get_text('terminating_apps')}[/bold yellow]")
+    status.update(f"[bold white]{get_text('terminating_apps')}[/bold white]")
     terminated_count = 0
     if apps_to_terminate:
         running_procs = list(psutil.process_iter(['pid', 'name', 'exe']))
@@ -414,11 +414,11 @@ def manage_processes(apps_to_launch, apps_to_terminate, status):
                         console.log(f"[{STYLE_ERROR}]{get_text('failed_to_terminate')}:[/{STYLE_ERROR}] {app['name']}")
                         continue
     
-    console.log(f"[bold green]{get_text('processes_terminated', count=terminated_count)}[/bold green]")
+    console.log(f"[bold white]{get_text('processes_terminated', count=terminated_count)}[/bold white]")
     time.sleep(1)
 
     # 3. LAUNCH LOGIC
-    status.update(f"[bold yellow]{get_text('starting_apps')}[/bold yellow]")
+    status.update(f"[bold white]{get_text('starting_apps')}[/bold white]")
     launched_count = 0
     if apps_to_launch:
         running_app_paths = {os.path.normcase(p.info['exe']) for p in psutil.process_iter(['exe']) if p.info.get('exe')}
@@ -468,12 +468,12 @@ def manage_processes(apps_to_launch, apps_to_terminate, status):
             except Exception as e:
                 console.log(f"[{STYLE_ERROR}]{get_text('failed_to_start')}:[/{STYLE_ERROR}] {app['name']} - {e}")
 
-    console.log(f"[bold green]{get_text('apps_launched', count=launched_count)}[/bold green]")
+    console.log(f"[bold white]{get_text('apps_launched', count=launched_count)}[/bold white]")
     time.sleep(1)
 
     apps_to_close = [app for app in apps_to_launch if app.get("close_after_launch")]
     if apps_to_close:
-        status.update(f"[bold yellow]{get_text('finishing_interfaces')}[/bold yellow]")
+        status.update(f"[bold white]{get_text('finishing_interfaces')}[/bold white]")
         time.sleep(4)
         for app in apps_to_close:
             try:
@@ -525,10 +525,10 @@ def crypto_animation(text_to_reveal):
                 for j in range(i, len(text_to_reveal)):
                     if text_to_reveal[j] != " ":
                        scrambled_text[j] = random.choice(chars)
-                live.update(Text("".join(scrambled_text), justify="center", style="bold cyan"), refresh=True)
+                live.update(Text("".join(scrambled_text), justify="center", style="cyan"), refresh=True)
                 time.sleep(0.04)
             result[i] = text_to_reveal[i]
-            live.update(Text("".join(result), justify="center", style="bold cyan"), refresh=True)
+            live.update(Text("".join(result), justify="center", style="cyan"), refresh=True)
             time.sleep(0.05)
 
 def show_splash_screen():
@@ -562,7 +562,7 @@ def show_header():
     console.print(Panel(Text("SEVERANCE SYSTEM", justify="center", style="bold white"), style=STYLE_ACCENT, border_style=STYLE_ACCENT))
     active_mode = config.get('active_mode', get_text('none_mode'))
     console.print(Align.center(Text.from_markup(f"{get_text('active_mode')}: [bold]{active_mode}[/bold]", style="dim")))
-
+  
 def show_main_menu():
     show_header()
     console.print()
@@ -596,7 +596,7 @@ def show_main_menu():
     console.print(bottom_grid)
 
 def clear_system_junk(console):
-    console.log(f"[bold yellow]{get_text('clearing_cache')}[/bold yellow]")
+    console.log(f"[bold white]{get_text('clearing_cache')}[/bold white]")
     temp_dirs = [os.environ.get('TEMP'), os.path.join(os.environ.get('WINDIR', 'C:/Windows'), 'Temp')]
     cleaned_count = 0
     for temp_dir in temp_dirs:
@@ -619,7 +619,7 @@ def clear_system_junk(console):
             console.log(f"[{STYLE_ERROR}]{get_text('permission_denied')}:[/{STYLE_ERROR}] {get_text('permission_denied_listing', dir=temp_dir)}")
         except OSError as e:
             console.log(f"[{STYLE_ERROR}]{get_text('error_accessing')}:[/{STYLE_ERROR}] {temp_dir} - {e}")
-    console.log(f"[bold green]{get_text('temp_items_removed', count=cleaned_count)}[/bold green]")
+    console.log(f"[bold white]{get_text('temp_items_removed', count=cleaned_count)}[/bold white]")
     time.sleep(1)
 
 def start_mode(mode_name, apps_to_launch, apps_to_terminate):
@@ -643,11 +643,11 @@ def start_mode(mode_name, apps_to_launch, apps_to_terminate):
             try:
                 console.log(f"[dim]{get_text('applying_wallpaper', mode_name=mode_name)}...[/dim]")
                 key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Control Panel\Desktop", 0, winreg.KEY_WRITE)
-                winreg.SetValueEx(key, "WallpaperStyle", 0, winreg.REG_DWORD, wallpaper_style)
-                winreg.SetValueEx(key, "TileWallpaper", 0, winreg.REG_DWORD, tile_wallpaper)
+                winreg.SetValueEx(key, "WallpaperStyle", 0, winreg.REG_SZ, str(wallpaper_style))
+                winreg.SetValueEx(key, "TileWallpaper", 0, winreg.REG_SZ, str(tile_wallpaper))
                 winreg.CloseKey(key)
                 ctypes.windll.user32.SystemParametersInfoW(20, 0, os.path.abspath(wallpaper_path), 3)
-                console.log(f"[bold green]{get_text('wallpaper_applied')}[/bold green]")
+                console.log(f"[bold white]{get_text('wallpaper_applied')}[/bold white]")
             except Exception as e:
                 console.log(f"[{STYLE_ERROR}]{get_text('error_applying_wallpaper')}:[/{STYLE_ERROR}] {e}")
     else:
@@ -656,7 +656,7 @@ def start_mode(mode_name, apps_to_launch, apps_to_terminate):
     with console.status(get_text('processing'), spinner="dots") as status:
         manage_processes(apps_to_launch, apps_to_terminate, status)
     
-    console.print(f"\n[bold green]{get_text('mode_activated_successfully', mode_name=mode_name)}[/bold green]")
+    console.print(f"\n[bold white]{get_text('mode_activated_successfully', mode_name=mode_name)}[/bold white]")
     time.sleep(3)
 
 def view_database():
@@ -709,7 +709,7 @@ def add_app_screen():
                 console.print(f"\n[{STYLE_ERROR}]{get_text('no_file_selected')}[/{STYLE_ERROR}]")
                 time.sleep(2)
                 continue
-            console.print(f"{get_text('file_selected')}: [cyan]{app_path}[/cyan]")
+            console.print(f"{get_text('file_selected')}:{app_path}")
         except Exception as e:
             console.log(f"[{STYLE_ERROR}]{get_text('error')}:[/{STYLE_ERROR}] {get_text('error_opening_file_browser', e=e)}")
             time.sleep(2)
@@ -722,7 +722,7 @@ def add_app_screen():
             apps = load_apps(db_name)
             apps.append({"name": app_name.upper(), "path": app_path, "close_after_launch": close_after_launch, "requires_admin": requires_admin})
             save_apps(db_name, apps)
-            console.print(f"\n[bold green]{get_text('success')}![/bold green] {get_text('app_added_success', name=app_name)}.")
+            console.print(f"\n[bold white]{get_text('success')}![/bold white] {get_text('app_added_success', name=app_name)}.")
         else:
             console.print(f"\n[{STYLE_ERROR}]{get_text('error')}:[/{STYLE_ERROR}] {get_text('name_path_empty_error')}")
         time.sleep(2)
@@ -771,7 +771,7 @@ def delete_app_screen():
         if Confirm.ask(get_text("delete_confirm_prompt", name=app_to_delete)):
             apps.pop(app_index)
             save_apps(db_name, apps)
-            console.print(f"\n[bold green]{get_text('success')}![/bold green] {get_text('app_deleted_success', name=app_to_delete)}")
+            console.print(f"\n[bold white]{get_text('success')}![/bold white] {get_text('app_deleted_success', name=app_to_delete)}")
         else:
             console.print(f"\n{get_text('operation_cancelled')}")
         time.sleep(2)
@@ -799,7 +799,7 @@ def add_wallpaper_screen():
                 console.print(f"\n[{STYLE_ERROR}]{get_text('no_file_selected')}[/{STYLE_ERROR}]\n[dim]{get_text('back_to_main_menu')}[/dim]")
                 time.sleep(2)
                 break
-            console.print(f"{get_text('file_selected')}: [cyan]{wallpaper_path}[/cyan]")
+            console.print(f"{get_text('file_selected')}:{wallpaper_path}")
         except Exception as e:
             console.log(f"[{STYLE_ERROR}]{get_text('error')}:[/{STYLE_ERROR}] {get_text('error_opening_file_browser', e=e)}")
             time.sleep(2)
@@ -816,7 +816,7 @@ def add_wallpaper_screen():
         current_config[mode_choice_map[mode_choice]] = {"path": wallpaper_path, "style": selected_style_key}
         save_config(current_config)
         
-        console.print(f"\n[bold green]{get_text('success')}![/bold green] {get_text('wallpaper_set_success', mode_name=mode_name_map[mode_choice], style_name=style_choices[selected_style_key])}")
+        console.print(f"\n[bold white]{get_text('success')}![/bold white] {get_text('wallpaper_set_success', mode_name=mode_name_map[mode_choice], style_name=style_choices[selected_style_key])}")
         time.sleep(2)
 
         if not Confirm.ask(get_text("configure_another_wallpaper_prompt")): break
@@ -835,7 +835,7 @@ def restore_to_default():
                     os.remove(db_path)
                     console.log(f"[dim]{get_text('removed')}:[/dim] {db_file}")
             
-            console.print(f"\n[bold green]{get_text('system_restored')}[/bold green]")
+            console.print(f"\n[bold white]{get_text('system_restored')}[/bold white]")
             console.print(f"[dim]{get_text('restart_app_prompt')}[/dim]")
             time.sleep(4)
             sys.exit()
@@ -856,7 +856,7 @@ def main():
     if not user_name:
         # FIRST RUN EXPERIENCE
         clear_screen()
-        console.print(Align.center(Panel(Text("CHOOSE YOUR LANGUAGE / ESCOLHA SEU IDIOMA", justify="center", style="bold white"), border_style="green")))
+        console.print(Align.center(Panel(Text("CHOOSE YOUR LANGUAGE / ESCOLHA SEU IDIOMA", justify="center", style="bold white"), border_style="white")))
         console.print("\n")
         console.print(Align.center("1. ENGLISH"))
         console.print(Align.center("2. PORTUGUÊS (BRASILEIRO)"))
@@ -876,7 +876,7 @@ def main():
         
         show_splash_screen()
         clear_screen()
-        console.print(Align.center(Panel(Text(get_text("welcome_to_severance"), justify="center", style="bold white"), border_style="green")))
+        console.print(Align.center(Panel(Text(get_text("welcome_to_severance"), justify="center", style="bold white"), border_style="white")))
         console.print("\n")
         console.print(Align.center(Text(get_text("what_is_your_name_innie"))))
         user_name = Prompt.ask("")
@@ -888,19 +888,19 @@ def main():
         console.rule(style=STYLE_MATRIX)
         time.sleep(1)
         clear_screen()
-        console.print(Panel(Text(get_text("access_granted"), justify="center", style="bold white"), border_style="green"))
+        console.print(Panel(Text(get_text("access_granted"), justify="center", style="bold white"), border_style="white"))
         time.sleep(2)
         clear_screen()
         crypto_animation("SEVERANCE SYSTEM")
         time.sleep(2)
         clear_screen()
-        console.print(Align.center(Panel(Text(get_text("hello_prepared_for_new_day", user_name=user_name.strip().title()), justify="center", style="bold white"), border_style="green")))
+        console.print(Align.center(Panel(Text(get_text("hello_prepared_for_new_day", user_name=user_name.strip().title()), justify="center", style="bold white"), border_style="white")))
         time.sleep(3)
     else: 
         # SUBSEQUENT RUNS
         LANG = config.get('language', 'pt')
         show_splash_screen()
-        console.print(Align.center(Panel(Text(get_text("welcome_back", user_name=user_name.strip().title()), justify="center", style="bold white"), border_style="green")))
+        console.print(Align.center(Panel(Text(get_text("welcome_back", user_name=user_name.strip().title()), justify="center", style="bold white"), border_style="white")))
         time.sleep(2)
 
     # --- MAIN LOOP ---
@@ -929,9 +929,9 @@ def main():
 
     clear_screen()
     user_name = config.get("user_name", "")
-    console.print(Align.center(Panel(Text(get_text("goodbye", user_name=user_name.strip().title()), justify="center", style="bold yellow"), border_style="yellow")))
+    console.print(Align.center(Panel(Text(get_text("goodbye", user_name=user_name.strip().title()), justify="center", style="bold white"), border_style="white")))
     time.sleep(2)
-    console.print(f"\n{get_text('shutting_down')}...", style="bold yellow")
+    console.print(f"\n{get_text('shutting_down')}...", style="bold white")
     time.sleep(1)
 
 if __name__ == "__main__":
