@@ -17,6 +17,7 @@
     "connecting_to_mainframe": "CONECTANDO AO MAINFRAME...",
     "welcome_to_severance": "BEM-VINDO AO SISTEMA SEVERANCE",
     "what_is_your_name_innie": "Qual é o seu nome, innie?",
+    "no_name_provided": "É preciso informar um nome para continuar.",
     "verifying_credentials": "VERIFICANDO CREDENCIAIS...",
     "access_granted": "ACESSO CONCEDIDO",
     "hello_prepared_for_new_day": "Olá, {user_name}! Preparado para um novo dia?",
@@ -187,6 +188,7 @@
     "gui_lock_terminal_locked": "TERMINAL BLOQUEADO",
     "gui_lock_contact_admin": "CONTATE UM ADMINISTRADOR",
 
+    "gui_close_to_tray": "Ao fechar, minimizar para a bandeja",
     "gui_sound_effects": "Efeitos sonoros",
     "gui_settings_tooltip": "Ajustes",
     "gui_lock_tooltip": "Bloquear a tela",

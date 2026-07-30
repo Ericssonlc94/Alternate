@@ -139,11 +139,17 @@ class SettingsDialog(QDialog):
         self.sound_check = QCheckBox(translator("gui_sound_effects"))
         self.sound_check.setChecked(bool(config.get("sound_enabled", False)))
 
+        # Ligado por padrão: é o comportamento que o app sempre teve. Desmarcado,
+        # o X encerra o programa em vez de escondê-lo na bandeja.
+        self.close_to_tray_check = QCheckBox(translator("gui_close_to_tray"))
+        self.close_to_tray_check.setChecked(bool(config.get("close_to_tray", True)))
+
         form = QFormLayout()
         form.addRow(translator("gui_user_name"), self.name_edit)
         form.addRow(translator("gui_language"), self.lang_combo)
         form.addRow(translator("gui_theme"), self.theme_combo)
         form.addRow("", self.sound_check)
+        form.addRow("", self.close_to_tray_check)
         form.addRow("", self.start_locked_check)
 
         wallpaper_button = QPushButton(translator("menu_option_6"))
@@ -198,6 +204,7 @@ class SettingsDialog(QDialog):
             "theme": self.theme_combo.currentData(),
             "start_locked": self.start_locked_check.isChecked(),
             "sound_enabled": self.sound_check.isChecked(),
+            "close_to_tray": self.close_to_tray_check.isChecked(),
         }
 
 

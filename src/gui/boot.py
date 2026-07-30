@@ -61,9 +61,21 @@ class BootScreen(QWidget):
 
     # --- roteiro ---
     def play(self, user_name):
-        """Monta o roteiro e começa. `user_name` personaliza a saudação."""
+        """Monta o roteiro e começa. `user_name` personaliza a saudação.
+
+        Sem nome gravado a abertura NÃO concede acesso: não há a quem conceder
+        antes de o usuário se identificar. A verificação de credenciais fica —
+        é ela que motiva a pergunta —, mas a liberação passa para o cadastro
+        (`gui/enroll.py`), depois do nome informado.
+        """
         greeting = (self._t("welcome_back", user_name=user_name) if user_name
                     else self._t("welcome_to_severance"))
+
+        granted = [
+            ("line", self._t("access_granted"), "BootAccess"),
+            ("sound", "confirm"),
+            ("pause", 260),
+        ] if user_name else []
 
         self._script = [
             ("sound", "boot"),
@@ -80,9 +92,7 @@ class BootScreen(QWidget):
             ("pause", 200),
             ("line", self._t("verifying_credentials"), "BootLine"),
             ("pause", 140),
-            ("line", self._t("access_granted"), "BootAccess"),
-            ("sound", "confirm"),
-            ("pause", 260),
+            *granted,
             ("line", greeting, "BootGreeting"),
             ("pause", 700),
         ]

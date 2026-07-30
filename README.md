@@ -9,6 +9,8 @@ launching the new ones, swapping the wallpaper and clearing temp files.
 The project ships **two frontends over a single engine**: a PySide6 GUI (the
 main one) and the original `rich` CLI.
 
+![Severance System boot sequence: the ROBCO-LUMON INDUSTRIES startup with the motto "BUILDING BETTER WORKERS", the mainframe uplink and the credential check](assets/severance%20system%20intro.png)
+
 ---
 
 ## 📁 Project structure
@@ -114,14 +116,32 @@ opens `data/config.json` or runs the CLI walks straight past it.
 **Control tab** — start Work Mode, start Personal Mode, clear cache and temp
 files. A log panel reports every process terminated and launched.
 
+![Main window in the Severance theme: LUMON INDUSTRIES header, Control and Database tabs, the mode buttons, maintenance and the activity log](assets/severance%20system%20menu%20theme%201.png)
+
+*The active mode is highlighted above the buttons, and the activity log shows
+what the engine is doing in real time.*
+
 **Database tab** — lists each mode's apps, with add and delete.
 
-**Settings (⚙)** — user name, language, theme, start locked, sound effects,
-wallpaper and restore defaults.
+**Settings (⚙)** — user name, language, theme, sound effects, minimize to tray on
+close, start locked, wallpaper and restore defaults.
 
-**Themes** — `severance` (default) and `fallout`.
+**Themes** — `severance` (default) and `fallout`, switchable on the fly from
+Settings.
 
-**Tray** — the window minimizes to the system tray instead of closing.
+![The same main window in the Fallout theme: green phosphor on a dark background, with the padlock button next to the gear](assets/severance%20system%20menu%20theme%202.png)
+
+*The Fallout theme swaps cyan for green phosphor and adds the **padlock button**
+(🔒) next to the gear — it appears only in this theme, because it is what opens
+the Termlink terminal.*
+
+**Tray** — by default the X minimizes the window to the system tray instead of
+quitting, and the real exit lives in the tray menu. Unchecking *"Minimize to tray
+on close"* in Settings makes the X quit the program.
+
+**First run** — with no name on record, the boot sequence grants no access: it
+checks the credentials and hands over to the enrollment screen. The menu only
+appears once the name is given, followed by *access granted* and the greeting.
 
 No action runs on the UI thread: everything goes through a `Worker` and comes
 back as Qt signals, so the window never freezes during a mode switch.
@@ -158,6 +178,7 @@ back as Qt signals, so the window never freezes during a mode switch.
 | `theme` | `severance` or `fallout` |
 | `start_locked` | open on the lock screen |
 | `sound_enabled` | terminal sound effects |
+| `close_to_tray` | the X minimizes to the tray instead of quitting (default: `true`) |
 | `wallpaper_walk_desktops` | walk the virtual desktops when applying the wallpaper (default: `true`) |
 
 ### `data/work_apps.json` and `data/personal_apps.json`

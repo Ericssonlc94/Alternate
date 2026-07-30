@@ -9,6 +9,8 @@ inicia os do novo, troca o papel de parede e limpa arquivos temporários.
 O projeto tem **duas interfaces sobre o mesmo núcleo**: uma GUI em PySide6
 (principal) e a CLI original em `rich`.
 
+![Abertura do Severance System: o boot da ROBCO-LUMON INDUSTRIES, com o lema "BUILDING BETTER WORKERS", a conexão ao mainframe e a verificação de credenciais](assets/severance%20system%20intro.png)
+
 ---
 
 ## 📁 Estrutura do projeto
@@ -113,14 +115,31 @@ um que abra `data/config.json` ou rode a CLI passa por cima dela.
 **Aba Controle** — iniciar Modo Trabalho, iniciar Modo Pessoal, limpar cache e
 temporários. Um painel de log mostra cada processo encerrado/iniciado.
 
+![Menu principal no tema Severance: cabeçalho LUMON INDUSTRIES, abas Controle e Banco de Dados, os botões de modo, a manutenção e o registro de atividade](assets/severance%20system%20menu%20theme%201.png)
+
+*O modo ativo aparece em destaque acima dos botões, e o registro de atividade
+mostra o que o núcleo está fazendo em tempo real.*
+
 **Aba Banco de Dados** — lista os apps de cada modo, com adicionar e excluir.
 
-**Ajustes (⚙)** — nome de usuário, idioma, tema, iniciar bloqueado, efeitos
-sonoros, papel de parede e restaurar ao padrão.
+**Ajustes (⚙)** — nome de usuário, idioma, tema, efeitos sonoros, minimizar para
+a bandeja ao fechar, iniciar bloqueado, papel de parede e restaurar ao padrão.
 
-**Temas** — `severance` (padrão) e `fallout`.
+**Temas** — `severance` (padrão) e `fallout`. A troca é imediata, pelos Ajustes.
 
-**Bandeja** — a janela minimiza para a bandeja em vez de fechar.
+![O mesmo menu principal no tema Fallout: fósforo verde sobre fundo escuro, com o botão de cadeado ao lado da engrenagem](assets/severance%20system%20menu%20theme%202.png)
+
+*O tema Fallout troca o ciano por fósforo verde e acrescenta o **botão de cadeado**
+(🔒) ao lado da engrenagem — ele só aparece neste tema, porque é o que dá acesso
+ao terminal Termlink.*
+
+**Bandeja** — por padrão o X minimiza a janela para a bandeja em vez de encerrar,
+e a saída definitiva fica no menu dela. Desmarcando *"Ao fechar, minimizar para a
+bandeja"* nos Ajustes, o X passa a encerrar o programa.
+
+**Primeiro uso** — sem nome gravado, a abertura não concede acesso: ela verifica
+as credenciais e entrega a tela de cadastro. O menu só aparece depois do nome
+informado, seguido de *acesso concedido* e da saudação.
 
 Nenhuma ação roda na thread da interface: tudo passa por um `Worker`, e os
 eventos voltam como *signals* Qt. A janela não congela durante uma troca de modo.
@@ -157,6 +176,7 @@ eventos voltam como *signals* Qt. A janela não congela durante uma troca de mod
 | `theme` | `severance` ou `fallout` |
 | `start_locked` | abrir na tela de bloqueio |
 | `sound_enabled` | efeitos sonoros do terminal |
+| `close_to_tray` | o X minimiza para a bandeja em vez de encerrar (padrão: `true`) |
 | `wallpaper_walk_desktops` | percorrer as áreas de trabalho ao aplicar o papel de parede (padrão: `true`) |
 
 ### `data/work_apps.json` e `data/personal_apps.json`

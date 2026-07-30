@@ -23,6 +23,7 @@ import core
 from .boot import BootScreen
 from .dialogs import AppDialog, SettingsDialog, WallpaperDialog
 from .effects import CRTOverlay, apply_glow
+from .enroll import EnrollScreen
 from .lockscreen import FalloutLockScreen
 from .reporter import QtReporter, Worker
 from .sound import SoundPlayer
@@ -94,6 +95,10 @@ class MainWindow(QMainWindow):
         self.lock_screen = FalloutLockScreen(self.t, self.theme_name, sound=self.sound)
         self.lock_screen.unlocked.connect(self._on_unlocked)
         self.stack.addWidget(self.lock_screen)
+
+        self.enroll_screen = EnrollScreen(self.t, self.sound, self.theme_name)
+        self.enroll_screen.submitted.connect(self._on_enrolled)
+        self.stack.addWidget(self.enroll_screen)
 
         self.main_page = QWidget()
         layout = QVBoxLayout(self.main_page)
@@ -235,16 +240,36 @@ class MainWindow(QMainWindow):
         self.boot_screen.play(self.config.get("user_name", ""))
 
     def _on_boot_finished(self):
-        """Terminada a abertura, decide entre o bloqueio e a interface.
+        """Terminada a abertura, decide qual tela entra em cena.
 
-        O bloqueio de abertura é de uma vez só: `start_locked` começa armado, e
-        resolver o enigma o desarma para sempre (ver `_on_unlocked`). Só volta a
-        valer se o usuário rearmar nos ajustes ou clicar no cadeado.
+        Sem nome gravado (primeiro uso, `data/` apagada, config corrompido) o
+        cadastro vem antes de tudo: a interface só aparece depois de respondido.
+
+        Passado isso, o bloqueio de abertura é de uma vez só: `start_locked`
+        começa armado, e resolver o enigma o desarma para sempre (ver
+        `_on_unlocked`). Só volta a valer se o usuário rearmar nos ajustes ou
+        clicar no cadeado.
         """
+        if not self.config.get("user_name"):
+            self.stack.setCurrentWidget(self.enroll_screen)
+            self.enroll_screen.start()
+            return
+        self._enter_after_boot()
+
+    def _enter_after_boot(self):
+        """Decide entre o bloqueio e a interface, já com o nome garantido."""
         if self.theme_name == "fallout" and self.config.get("start_locked", True):
             self.lock(startup=True)
         else:
             self.stack.setCurrentWidget(self.main_page)
+
+    def _on_enrolled(self, name):
+        """Grava o nome informado e libera o restante da inicialização."""
+        self.config["user_name"] = name
+        core.save_config(self.config)
+        self._refresh_header_status()
+        self._log(self.t("hello_prepared_for_new_day", user_name=name), "info")
+        self._enter_after_boot()
 
     # ------------------------------------------------------------------
     # Bandeja do sistema
@@ -292,9 +317,20 @@ class MainWindow(QMainWindow):
         self.activateWindow()
 
     def closeEvent(self, event):
-        """Clicar no X esconde na bandeja; encerrar de verdade só pelo menu dela."""
+        """O que o X faz depende do ajuste `close_to_tray`.
+
+        Ligado (padrão), esconde na bandeja e encerrar de verdade só pelo menu
+        dela. Desligado, o X encerra o programa — daí a chamada a `quit_app`, e
+        não um simples `accept()`: sem ela a janela sumiria mas o processo
+        continuaria vivo, porque `setQuitOnLastWindowClosed(False)` desliga o
+        encerramento automático do Qt.
+        """
         if self._quitting:
             event.accept()
+            return
+        if not self.config.get("close_to_tray", True):
+            event.ignore()  # quem encerra é quit_app, no caminho normal de saída
+            self.quit_app()
             return
         event.ignore()
         self.hide()
@@ -323,6 +359,7 @@ class MainWindow(QMainWindow):
         self.overlay.raise_()
         self.boot_screen.set_theme(name)
         self.lock_screen.set_theme(name)
+        self.enroll_screen.set_theme(name)
 
         # O halo precisa ser reaplicado: a cor faz parte do efeito, não do QSS.
         apply_glow(self.title_label, theme["accent"], theme["glow_radius"])
@@ -587,5 +624,6 @@ class MainWindow(QMainWindow):
         self.quit_action.setText(self.t("gui_tray_quit"))
         self.tray.setToolTip(self.t("gui_window_title"))
         self.lock_screen.retranslate()
+        self.enroll_screen.retranslate()
         self._refresh_header_status()
         self.refresh_app_lists()
