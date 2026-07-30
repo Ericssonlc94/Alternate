@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+
+# Ambiente virtual
+venv/
+
+# Saida do PyInstaller (a receita de build fica versionada em packaging/)
+build/
+dist/
+
+# Dados locais / backups gerados em runtime
+data/virtual_desktops_backup.json
+
+# Logs — a pasta e versionada vazia, o conteudo nao
+logs/*
+!logs/.gitkeep
+*.log

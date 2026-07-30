@@ -1,5 +1,3 @@
-import json
-import subprocess
 import psutil # pyright: ignore[reportMissingModuleSource]
 import time
 import sys
@@ -7,11 +5,6 @@ import os
 import winsound
 import random
 import string
-import pygetwindow as gw # pyright: ignore[reportMissingImports]
-import shutil
-import pyautogui  # pyright: ignore[reportMissingModuleSource]
-import ctypes
-import winreg
 import tkinter as tk
 from tkinter import filedialog
 from rich.console import Console # pyright: ignore[reportMissingImports]
@@ -22,315 +15,24 @@ from rich.table import Table # pyright: ignore[reportMissingImports]
 from rich.live import Live # pyright: ignore[reportMissingImports]
 from rich.align import Align # pyright: ignore[reportMissingImports]
 
+import core
+from core import (
+    WORK_DB, PERSONAL_DB, CONFIG_DB,
+    get_db_path, load_apps, save_apps, load_config,
+)
+
 # --- CONSTANTS ---
 STYLE_BG = "on #001E29"
 STYLE_FG = "white"
 STYLE_ACCENT = "cyan"
 STYLE_ERROR = "bold red"
 STYLE_MATRIX = "white"
-WORK_DB = "work_apps.json"
-PERSONAL_DB = "personal_apps.json"
-CONFIG_DB = "config.json"
 
 console = Console(style=f"{STYLE_FG} {STYLE_BG}")
 
 # --- I18N (Internationalization) ---
-i18n = {
-    'pt': {
-        # General
-        "work_mode": "TRABALHO",
-        "personal_mode": "PESSOAL",
-        "none_mode": "NENHUM",
-        "error": "ERRO",
-        "warning": "AVISO",
-        "success": "SUCESSO",
-        "confirm_yes": "Sim",
-        "confirm_no": "Não",
-        "confirm_prompt": "Deseja continuar?",
-        "try_again_prompt": "Tentar novamente?",
-        "back_to_main_menu": "Voltando ao menu principal...",
-        "press_enter_to_return": "Pressione [bold]Enter[/bold] para voltar ao menu",
-        "created_by": "Created by Ericsson Cardoso",
-        "invalid_option": "OPÇÃO INVÁLIDA.",
-        # Splash & Welcome
-        "lumon_industries": "LUMON INDUSTRIES.",
-        "connecting_to_mainframe": "CONECTANDO AO MAINFRAME...",
-        "welcome_to_severance": "BEM-VINDO AO SISTEMA SEVERANCE",
-        "what_is_your_name_innie": "Qual é o seu nome, innie?",
-        "verifying_credentials": "VERIFICANDO CREDENCIAIS...",
-        "access_granted": "ACESSO CONCEDIDO",
-        "hello_prepared_for_new_day": "Olá, {user_name}! Preparado para um novo dia?",
-        "welcome_back": "Bem-vindo de volta, {user_name}!",
-        "goodbye": "Até logo, {user_name}! Tenha um bom dia.",
-        "shutting_down": "DESLIGANDO SISTEMA...",
-        "emergency_shutdown": "DESLIGAMENTO DE EMERGÊNCIA INICIADO.",
-        # Main Menu
-        "main_menu_title": "MENU DE OPÇÕES",
-        "active_mode": "MODO ATIVO",
-        "menu_option_1": "INICIAR MODO DE TRABALHO",
-        "menu_option_2": "INICIAR MODO PESSOAL",
-        "menu_option_3": "ADICIONAR APP AO BANCO DE DADOS",
-        "menu_option_4": "CONSULTAR BANCO DE DADOS",
-        "menu_option_5": "EXCLUIR APP DO BANCO DE DADOS",
-        "menu_option_6": "ADICIONAR PAPEL DE PAREDE",
-        "menu_option_7": "LIMPAR CACHE E ARQUIVOS TEMPORÁRIOS",
-        "menu_option_8": "RESTAURAR AO PADRÃO",
-        "menu_option_9": "SAIR",
-        "change_language_prompt": "Mudar Idioma (EN/PT)",
-        # Battery
-        "battery_charging": "CARREGANDO",
-        "battery_discharging": "DESCARREGANDO",
-        "battery_na": "BATERIA N/A",
-        # Process Management
-        "terminating_apps": "TERMINANDO APLICATIVOS DO MODO ANTERIOR...",
-        "terminated_aggressively": "TERMINADO (KILL AGRESSIVO)",
-        "terminated": "TERMINADO",
-        "failed_to_terminate": "FALHA AO TERMINAR",
-        "processes_terminated": "{count} PROCESSOS TERMINADOS.",
-        "starting_apps": "INICIANDO APLICATIVOS DO MODO ATUAL...",
-        "already_running": "JÁ EM EXECUÇÃO",
-        "started": "INICIADO",
-        "failed_to_start": "FALHA AO INICIAR",
-        "apps_launched": "{count} APLICATIVOS INICIADOS.",
-        "finishing_interfaces": "FINALIZANDO INTERFACES...",
-        "closing_window_alt_f4": "Fechando interface de '{title}' com Alt+F4...",
-        "could_not_close_window": "Não foi possível fechar a janela de '{name}': {e}",
-        "organizing_desktop": "ORGANIZANDO ÁREA DE TRABALHO...",
-        "closing_window": "Fechando janela",
-        "closing_regular_dropbox_window": "Fechando janela regular do Dropbox",
-        "error_closing_windows": "Ocorreu um erro ao fechar as janelas: {e}",
-        "windows_closed": "{count} JANELAS FECHADAS.",
-        "minimizing_window": "Minimizando janela",
-        "error_minimizing_windows": "Ocorreu um erro ao minimizar janelas: {e}",
-        "windows_minimized": "{count} JANELAS MINIMIZADAS.",
-        # Loading / Status
-        "loading_data": "CARREGANDO DADOS...",
-        "processing": "PROCESSANDO...",
-        # System Junk
-        "clearing_cache": "LIMPANDO CACHE E ARQUIVOS TEMPORÁRIOS...",
-        "removed": "Removido",
-        "permission_denied": "PERMISSÃO NEGADA",
-        "error_removing": "ERRO AO REMOVER",
-        "permission_denied_listing": "Não foi possível listar o conteúdo de: {dir}. Tente executar como administrador para limpar esta pasta.",
-        "error_accessing": "ERRO AO ACESSAR",
-        "temp_items_removed": "{count} ITENS TEMPORÁRIOS REMOVIDOS.",
-        # Start Mode
-        "starting_mode": "INICIANDO {mode_name}...",
-        "wallpaper_not_found": "Arquivo de papel de parede não encontrado: {path}",
-        "wallpaper_warning": "Papel de parede configurado para o modo {mode_name} não encontrado: {path}",
-        "applying_wallpaper": "APLICANDO PAPEL DE PAREDE PARA O MODO {mode_name}...",
-        "wallpaper_applied": "PAPEL DE PAREDE APLICADO.",
-        "error_applying_wallpaper": "ERRO AO APLICAR PAPEL DE PAREDE",
-        "no_wallpaper_configured": "Nenhum papel de parede configurado para o modo {mode_name}.",
-        "mode_activated_successfully": "MODO {mode_name} ATIVADO COM SUCESSO.",
-        # View Database
-        "view_db_title": "BANCO DE DADOS DE APLICATIVOS",
-        "work_mode_col": "MODO DE TRABALHO",
-        "personal_mode_col": "MODO PESSOAL",
-        "app_info_admin": "[bold red](Requer Admin)[/bold red]",
-        # Add App
-        "add_app_title": "ADICIONAR NOVO APLICATIVO",
-        "select_db": "Selecione o banco de dados",
-        "db_choice_work": "t",
-        "db_choice_personal": "p",
-        "app_name_prompt": "NOME DO APP (ex: Notepad) ou digite [0] para voltar",
-        "opening_file_browser": "Abrindo buscador de arquivos...",
-        "file_selected": "Caminho selecionado",
-        "no_file_selected": "Nenhum arquivo selecionado. Operação cancelada.",
-        "error_opening_file_browser": "Não foi possível abrir o buscador de arquivos: {e}",
-        "close_after_launch_prompt": "Fechar janela após iniciar? (ex: Serpro, Steam)",
-        "requires_admin_prompt": "Este aplicativo requer permissão de administrador?",
-        "app_added_success": "App '{name}' adicionado.",
-        "name_path_empty_error": "Nome e caminho não podem ser vazios.",
-        "add_another_app_prompt": "Deseja adicionar outro aplicativo?",
-        "file_dialog_executables": "Executáveis",
-        "file_dialog_vbscript": "VBScript",
-        "file_dialog_all_files": "Todos os arquivos",
-        # Delete App
-        "delete_app_title": "EXCLUIR APLICATIVO",
-        "consulting_records": "CONSULTANDO REGISTROS...",
-        "db_is_empty": "O banco de dados {db} está vazio.",
-        "apps_in_db": "Aplicativos no banco de dados:",
-        "delete_app_prompt": "Digite o NÚMERO do app que deseja excluir ou digite [0] para voltar",
-        "invalid_number_prompt": "Número inválido. Por favor, digite um número entre 1 e {max}.",
-        "invalid_input_prompt": "Entrada inválida. Por favor, digite um número.",
-        "delete_confirm_prompt": "Tem certeza que deseja excluir '{name}'?",
-        "app_deleted_success": "App '{name}' excluído.",
-        "operation_cancelled": "Operação cancelada.",
-        "delete_another_app_prompt": "Deseja excluir outro aplicativo?",
-        # Wallpaper
-        "wallpaper_config_title": "CONFIGURAR PAPEL DE PAREDE",
-        "wallpaper_config_loading": "INICIANDO CONFIGURAÇÃO DE PAPEL DE PAREDE...",
-        "select_mode_for_wallpaper": "Selecione o modo para configurar o papel de parede",
-        "opening_file_browser_for_mode": "Abrindo buscador de arquivos para o modo {mode_name}...",
-        "image_files": "Arquivos de Imagem",
-        "invalid_file_format": "Formato de arquivo inválido. Apenas .jpg e .png são permitidos.",
-        "select_wallpaper_style": "Selecione o estilo do papel de parede:",
-        "style_fill": "Preencher (Fill)",
-        "style_fit": "Ajustar (Fit)",
-        "style_stretch": "Esticar (Stretch)",
-        "style_tile": "Lado a Lado (Tile)",
-        "style_center": "Centralizar (Center)",
-        "style_span": "Span (Múltiplos Monitores)",
-        "choose_option": "Escolha uma opção",
-        "wallpaper_set_success": "Papel de parede para o modo {mode_name} configurado como '{style_name}'.",
-        "configure_another_wallpaper_prompt": "Deseja configurar outro papel de parede?",
-        # Restore
-        "restore_title": "RESTAURAR AO PADRÃO",
-        "restore_loading": "PREPARANDO PARA RESTAURAR PADRÕES...",
-        "restore_warning": "[bold red]ATENÇÃO:[/bold red] Esta ação irá apagar TODOS os dados (aplicativos e configurações) e restaurar o sistema ao seu estado inicial. Tem certeza que deseja continuar?",
-        "system_restored": "SISTEMA RESTAURADO AO PADRÃO COM SUCESSO.",
-        "restart_app_prompt": "Por favor, reinicie o aplicativo para aplicar todas as mudanças.",
-        "error_restoring": "ERRO AO RESTAURAR",
-    },
-    'en': {
-        # General
-        "work_mode": "WORK",
-        "personal_mode": "PERSONAL",
-        "none_mode": "NONE",
-        "error": "ERROR",
-        "warning": "WARNING",
-        "success": "SUCCESS",
-        "confirm_yes": "Yes",
-        "confirm_no": "No",
-        "confirm_prompt": "Do you want to continue?",
-        "try_again_prompt": "Try again?",
-        "back_to_main_menu": "Returning to main menu...",
-        "press_enter_to_return": "Press [bold]Enter[/bold] to return to the menu",
-        "created_by": "Created by Ericsson Cardoso",
-        "invalid_option": "INVALID OPTION.",
-        # Splash & Welcome
-        "lumon_industries": "LUMON INDUSTRIES.",
-        "connecting_to_mainframe": "CONNECTING TO MAINFRAME...",
-        "welcome_to_severance": "WELCOME TO THE SEVERANCE SYSTEM",
-        "what_is_your_name_innie": "What is your name, innie?",
-        "verifying_credentials": "VERIFYING CREDENTIALS...",
-        "access_granted": "ACCESS GRANTED",
-        "hello_prepared_for_new_day": "Hello, {user_name}! Ready for a new day?",
-        "welcome_back": "Welcome back, {user_name}!",
-        "goodbye": "Goodbye, {user_name}! Have a nice day.",
-        "shutting_down": "SHUTTING DOWN SYSTEM...",
-        "emergency_shutdown": "EMERGENCY SHUTDOWN INITIATED.",
-        # Main Menu
-        "main_menu_title": "OPTIONS MENU",
-        "active_mode": "ACTIVE MODE",
-        "menu_option_1": "START WORK MODE",
-        "menu_option_2": "START PERSONAL MODE",
-        "menu_option_3": "ADD APP TO DATABASE",
-        "menu_option_4": "VIEW DATABASE",
-        "menu_option_5": "DELETE APP FROM DATABASE",
-        "menu_option_6": "SET WALLPAPER",
-        "menu_option_7": "CLEAR CACHE AND TEMP FILES",
-        "menu_option_8": "RESTORE TO DEFAULT",
-        "menu_option_9": "EXIT",
-        "change_language_prompt": "Change Language (EN/PT)",
-        # Battery
-        "battery_charging": "CHARGING",
-        "battery_discharging": "DISCHARGING",
-        "battery_na": "BATTERY N/A",
-        # Process Management
-        "terminating_apps": "TERMINATING PREVIOUS MODE APPLICATIONS...",
-        "terminated_aggressively": "TERMINATED (AGGRESSIVE KILL)",
-        "terminated": "TERMINATED",
-        "failed_to_terminate": "FAILED TO TERMINATE",
-        "processes_terminated": "{count} PROCESSES TERMINATED.",
-        "starting_apps": "STARTING CURRENT MODE APPLICATIONS...",
-        "already_running": "ALREADY RUNNING",
-        "started": "STARTED",
-        "failed_to_start": "FAILED TO START",
-        "apps_launched": "{count} APPLICATIONS LAUNCHED.",
-        "finishing_interfaces": "CLOSING INTERFACES...",
-        "closing_window_alt_f4": "Closing interface for '{title}' with Alt+F4...",
-        "could_not_close_window": "Could not close window for '{name}': {e}",
-        "organizing_desktop": "ORGANIZING DESKTOP...",
-        "closing_window": "Closing window",
-        "closing_regular_dropbox_window": "Closing regular Dropbox window",
-        "error_closing_windows": "An error occurred while closing windows: {e}",
-        "windows_closed": "{count} WINDOWS CLOSED.",
-        "minimizing_window": "Minimizing window",
-        "error_minimizing_windows": "An error occurred while minimizing windows: {e}",
-        "windows_minimized": "{count} WINDOWS MINIMIZED.",
-        # Loading / Status
-        "loading_data": "LOADING DATA...",
-        "processing": "PROCESSING...",
-        # System Junk
-        "clearing_cache": "CLEARING CACHE AND TEMPORARY FILES...",
-        "removed": "Removed",
-        "permission_denied": "PERMISSION DENIED",
-        "error_removing": "ERROR REMOVING",
-        "permission_denied_listing": "Could not list contents of: {dir}. Try running as administrator to clear this folder.",
-        "error_accessing": "ERROR ACCESSING",
-        "temp_items_removed": "{count} TEMPORARY ITEMS REMOVED.",
-        # Start Mode
-        "starting_mode": "STARTING {mode_name} MODE...",
-        "wallpaper_not_found": "Wallpaper file not found: {path}",
-        "wallpaper_warning": "Wallpaper configured for {mode_name} mode not found: {path}",
-        "applying_wallpaper": "APPLYING WALLPAPER FOR {mode_name} MODE...",
-        "wallpaper_applied": "WALLPAPER APPLIED.",
-        "error_applying_wallpaper": "ERROR APPLYING WALLPAPER",
-        "no_wallpaper_configured": "No wallpaper configured for {mode_name} mode.",
-        "mode_activated_successfully": "{mode_name} MODE ACTIVATED SUCCESSFULLY.",
-        # View Database
-        "view_db_title": "APPLICATION DATABASE",
-        "work_mode_col": "WORK MODE",
-        "personal_mode_col": "PERSONAL MODE",
-        "app_info_admin": "[bold red](Requires Admin)[/bold red]",
-        # Add App
-        "add_app_title": "ADD NEW APPLICATION",
-        "select_db": "Select the database",
-        "db_choice_work": "w",
-        "db_choice_personal": "p",
-        "app_name_prompt": "APP NAME (e.g., Notepad) or type [0] to go back",
-        "opening_file_browser": "Opening file browser...",
-        "file_selected": "File selected",
-        "no_file_selected": "No file selected. Operation cancelled.",
-        "error_opening_file_browser": "Could not open file browser: {e}",
-        "close_after_launch_prompt": "Close window after launch? (e.g., Serpro, Steam)",
-        "requires_admin_prompt": "Does this application require administrator privileges?",
-        "app_added_success": "App '{name}' added successfully.",
-        "name_path_empty_error": "Name and path cannot be empty.",
-        "add_another_app_prompt": "Do you want to add another application?",
-        "file_dialog_executables": "Executables",
-        "file_dialog_vbscript": "VBScript",
-        "file_dialog_all_files": "All files",
-        # Delete App
-        "delete_app_title": "DELETE APPLICATION",
-        "consulting_records": "CONSULTING RECORDS...",
-        "db_is_empty": "The {db} database is empty.",
-        "apps_in_db": "Applications in database:",
-        "delete_app_prompt": "Enter the NUMBER of the app to delete or type [0] to go back",
-        "invalid_number_prompt": "Invalid number. Please enter a number between 1 and {max}.",
-        "invalid_input_prompt": "Invalid input. Please enter a number.",
-        "delete_confirm_prompt": "Are you sure you want to delete '{name}'?",
-        "app_deleted_success": "App '{name}' deleted successfully.",
-        "operation_cancelled": "Operation cancelled.",
-        "delete_another_app_prompt": "Do you want to delete another application?",
-        # Wallpaper
-        "wallpaper_config_title": "CONFIGURE WALLPAPER",
-        "wallpaper_config_loading": "STARTING WALLPAPER CONFIGURATION...",
-        "select_mode_for_wallpaper": "Select the mode to configure the wallpaper for",
-        "opening_file_browser_for_mode": "Opening file browser for {mode_name} mode...",
-        "image_files": "Image Files",
-        "invalid_file_format": "Invalid file format. Only .jpg and .png are allowed.",
-        "select_wallpaper_style": "Select the wallpaper style:",
-        "style_fill": "Fill",
-        "style_fit": "Fit",
-        "style_stretch": "Stretch",
-        "style_tile": "Tile",
-        "style_center": "Center",
-        "style_span": "Span (Multiple Monitors)",
-        "choose_option": "Choose an option",
-        "wallpaper_set_success": "Wallpaper for {mode_name} mode set to '{style_name}'.",
-        "configure_another_wallpaper_prompt": "Do you want to configure another wallpaper?",
-        # Restore
-        "restore_title": "RESTORE TO DEFAULT",
-        "restore_loading": "PREPARING TO RESTORE DEFAULTS...",
-        "restore_warning": "[bold red]WARNING:[/bold red] This action will delete ALL data (applications and settings) and restore the system to its initial state. Are you sure you want to continue?",
-        "system_restored": "SYSTEM RESTORED TO DEFAULT SUCCESSFULLY.",
-        "restart_app_prompt": "Please restart the application to apply all changes.",
-        "error_restoring": "ERROR RESTORING",
-    }
-}
+# Traduções carregadas de assets/lang/*.json (ver core.load_translations).
+i18n = core.load_translations()
 
 # --- GLOBAL CONFIG & LANG ---
 config = {}
@@ -338,160 +40,43 @@ LANG = 'pt' # Default language, will be updated on load
 
 def get_text(key, **kwargs):
     """Fetches a text from the i18n dictionary for the current language."""
-    return i18n.get(LANG, i18n['pt']).get(key, f"<{key}>").format(**kwargs)
+    table = i18n.get(LANG) or i18n.get('pt') or {}
+    return table.get(key, f"<{key}>").format(**kwargs)
 
 # --- DATABASE FUNCTIONS ---
-def get_db_path(db_name):
-    exe_dir = os.path.dirname(sys.executable if getattr(sys, 'frozen', False) else __file__)
-    os.makedirs(exe_dir, exist_ok=True)
-    return os.path.join(exe_dir, db_name)
-
-def load_apps(db_name):
-    db_path = get_db_path(db_name)
-    try:
-        with open(db_path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return []
-
-def save_apps(db_name, apps):
-    db_path = get_db_path(db_name)
-    with open(db_path, "w", encoding="utf-8") as f:
-        json.dump(apps, f, indent=4)
-
-def load_config():
-    config_path = get_db_path(CONFIG_DB)
-    try:
-        with open(config_path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return {} # Return empty dict to signify first run
-
+# A camada de dados (get_db_path, load_apps, save_apps, load_config) vive em core.py.
+# Aqui fica apenas o wrapper que mantém o estado global `config` desta CLI sincronizado.
 def save_config(new_config):
     global config
     config = new_config
-    config_path = get_db_path(CONFIG_DB)
-    with open(config_path, "w", encoding="utf-8") as f:
-        json.dump(config, f, indent=4)
+    core.save_config(new_config)
 
-# --- PROCESS MANAGEMENT FUNCTIONS ---
-def manage_processes(apps_to_launch, apps_to_terminate, status):
-    # 1. IDENTIFY SHARED APPS
-    launch_paths = {os.path.normcase(app['path']) for app in apps_to_launch}
-    apps_to_terminate = [app for app in apps_to_terminate if os.path.normcase(app['path']) not in launch_paths]
+# --- PRESENTATION BRIDGE (núcleo -> rich) ---
+class RichReporter(core.Reporter):
+    """Traduz os eventos do núcleo para a saída rich (cores + i18n desta CLI).
 
-    # 2. TERMINATION LOGIC
-    status.update(f"[bold white]{get_text('terminating_apps')}[/bold white]")
-    terminated_count = 0
-    if apps_to_terminate:
-        running_procs = list(psutil.process_iter(['pid', 'name', 'exe']))
+    A GUI, no futuro, terá o seu próprio Reporter (ex.: atualizar labels/log box)
+    sem tocar em nada do núcleo.
+    """
 
-        for app in apps_to_terminate:
-            app_name_lower = app["name"].lower()
+    def __init__(self, status=None):
+        self._status = status  # objeto retornado por console.status(...) ou None
 
-            # Aggressive termination for Dropbox
-            if "dropbox" in app_name_lower:
-                for p in running_procs:
-                    try:
-                        p_name = p.name().lower()
-                        p_exe = os.path.basename(p.info['exe']).lower() if p.info['exe'] else ''
-                        if "dropbox" in p_name or "dropbox" in p_exe:
-                            p.kill()
-                            terminated_count += 1
-                            console.log(f"[dim]{get_text('terminated_aggressively')}:[/dim] {p.name()} (PID: {p.pid})")
-                    except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-                        continue
-            # Standard termination for other apps
-            else:
-                for p in running_procs:
-                    try:
-                        p_exe = os.path.normcase(p.info['exe']) if p.info['exe'] else ''
-                        if p_exe == os.path.normcase(app["path"]):
-                            p.terminate()
-                            terminated_count += 1
-                            console.log(f"[dim]{get_text('terminated')}:[/dim] {app['name']} (PID: {p.pid})")
-                    except (psutil.NoSuchProcess, psutil.AccessDenied):
-                        console.log(f"[{STYLE_ERROR}]{get_text('failed_to_terminate')}:[/{STYLE_ERROR}] {app['name']}")
-                        continue
-    
-    console.log(f"[bold white]{get_text('processes_terminated', count=terminated_count)}[/bold white]")
-    time.sleep(1)
+    def status(self, key, **kwargs):
+        if self._status is not None:
+            self._status.update(f"[bold white]{get_text(key, **kwargs)}[/bold white]")
 
-    # 3. LAUNCH LOGIC
-    status.update(f"[bold white]{get_text('starting_apps')}[/bold white]")
-    launched_count = 0
-    if apps_to_launch:
-        running_app_paths = {os.path.normcase(p.info['exe']) for p in psutil.process_iter(['exe']) if p.info.get('exe')}
-        for app in apps_to_launch:
-            app_path = app["path"]
-            app_name_lower = app["name"].lower()
+    def info(self, key, **kwargs):
+        console.log(f"[bold white]{get_text(key, **kwargs)}[/bold white]")
 
-            if os.path.normcase(app_path) in running_app_paths:
-                console.log(f"[dim]{get_text('already_running')}:[/dim] {app['name']}")
-                continue
-            
-            try:
-                _, ext = os.path.splitext(app_path)
-                requires_admin = app.get("requires_admin", False)
-                work_dir = os.path.dirname(app_path)
+    def detail(self, key, subject=None, **kwargs):
+        label = get_text(key, **kwargs)
+        console.log(f"[dim]{label}:[/dim] {subject}" if subject else f"[dim]{label}[/dim]")
 
-                # Special handling for Steam
-                if "steam" in app_name_lower:
-                    subprocess.Popen([app_path, "-silent"], cwd=work_dir)
-                    launched_count += 1
-                    console.log(f"[dim]{get_text('started')}:[/dim] {app['name']}")
-                
-                # Admin execution
-                elif requires_admin:
-                    executable = "wscript.exe" if ext.lower() == ".vbs" else app_path
-                    params = f'"{app_path}"' if ext.lower() == ".vbs" else None
-                    ret = ctypes.windll.shell32.ShellExecuteW(None, "runas", executable, params, work_dir, 1)
-                    if ret > 32:
-                        launched_count += 1
-                        console.log(f"[dim]{get_text('started')}:[/dim] {app['name']}")
-                    else:
-                        raise OSError(f"ShellExecuteW failed with error code {ret}. User may have cancelled the UAC prompt.")
-                
-                # Standard non-admin execution
-                else:
-                    if ext.lower() == ".vbs":
-                        subprocess.Popen(["wscript.exe", app_path], cwd=work_dir)
-                    else:
-                        startupinfo = subprocess.STARTUPINFO()
-                        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                        startupinfo.wShowWindow = 6
-                        subprocess.Popen([app_path], startupinfo=startupinfo, cwd=work_dir)
-                    launched_count += 1
-                    console.log(f"[dim]{get_text('started')}:[/dim] {app['name']}")
+    def error(self, key, subject=None, **kwargs):
+        label = get_text(key, **kwargs)
+        console.log(f"[{STYLE_ERROR}]{label}:[/{STYLE_ERROR}] {subject}" if subject else f"[{STYLE_ERROR}]{label}[/{STYLE_ERROR}]")
 
-                time.sleep(0.2)
-            except Exception as e:
-                console.log(f"[{STYLE_ERROR}]{get_text('failed_to_start')}:[/{STYLE_ERROR}] {app['name']} - {e}")
-
-    console.log(f"[bold white]{get_text('apps_launched', count=launched_count)}[/bold white]")
-    time.sleep(1)
-
-    apps_to_close = [app for app in apps_to_launch if app.get("close_after_launch")]
-    if apps_to_close:
-        status.update(f"[bold white]{get_text('finishing_interfaces')}[/bold white]")
-        time.sleep(4)
-        for app in apps_to_close:
-            try:
-                app_name = app.get("name")
-                if not app_name: continue
-                windows = [w for w in gw.getAllWindows() if app_name.lower() in w.title.lower()]
-                if not windows:
-                    short_name = app_name.split()[0]
-                    windows = [w for w in gw.getAllWindows() if short_name.lower() in w.title.lower()]
-                if windows:
-                    window = windows[0]
-                    console.log(f"[dim]{get_text('closing_window_alt_f4', title=window.title)}[/dim]")
-                    window.activate()
-                    time.sleep(1)
-                    pyautogui.hotkey('alt', 'f4')
-                    time.sleep(0.5)
-            except Exception as e:
-                console.log(f"[{STYLE_ERROR}]{get_text('could_not_close_window', name=app.get('name', 'unknown'), e=e)}[/{STYLE_ERROR}]")
 
 # --- UI FUNCTIONS ---
 def clear_screen():
@@ -595,33 +180,6 @@ def show_main_menu():
     )
     console.print(bottom_grid)
 
-def clear_system_junk(console):
-    console.log(f"[bold white]{get_text('clearing_cache')}[/bold white]")
-    temp_dirs = [os.environ.get('TEMP'), os.path.join(os.environ.get('WINDIR', 'C:/Windows'), 'Temp')]
-    cleaned_count = 0
-    for temp_dir in temp_dirs:
-        if not temp_dir or not os.path.exists(temp_dir): continue
-        try:
-            for item_name in os.listdir(temp_dir):
-                item_path = os.path.join(temp_dir, item_name)
-                try:
-                    if os.path.isfile(item_path) or os.path.islink(item_path):
-                        os.remove(item_path)
-                    elif os.path.isdir(item_path):
-                        shutil.rmtree(item_path)
-                    cleaned_count += 1
-                    console.log(f"[dim]{get_text('removed')}:[/dim] {item_path}")
-                except PermissionError:
-                    console.log(f"[{STYLE_ERROR}]{get_text('permission_denied')}:[/{STYLE_ERROR}] {item_path}")
-                except OSError as e:
-                    console.log(f"[{STYLE_ERROR}]{get_text('error_removing')}:[/{STYLE_ERROR}] {item_path} - {e}")
-        except PermissionError:
-            console.log(f"[{STYLE_ERROR}]{get_text('permission_denied')}:[/{STYLE_ERROR}] {get_text('permission_denied_listing', dir=temp_dir)}")
-        except OSError as e:
-            console.log(f"[{STYLE_ERROR}]{get_text('error_accessing')}:[/{STYLE_ERROR}] {temp_dir} - {e}")
-    console.log(f"[bold white]{get_text('temp_items_removed', count=cleaned_count)}[/bold white]")
-    time.sleep(1)
-
 def start_mode(mode_name, apps_to_launch, apps_to_terminate):
     show_loading_spinner(get_text('starting_mode', mode_name=mode_name))
     
@@ -631,30 +189,10 @@ def start_mode(mode_name, apps_to_launch, apps_to_terminate):
 
     wallpaper_data = config.get('work_wallpaper') if mode_name == get_text('work_mode') else config.get('personal_wallpaper')
 
-    if wallpaper_data and wallpaper_data.get('path'):
-        wallpaper_path = wallpaper_data['path']
-        if not os.path.exists(wallpaper_path):
-            console.log(f"[{STYLE_ERROR}]{get_text('error')}:[/{STYLE_ERROR}] {get_text('wallpaper_not_found', path=wallpaper_path)}")
-            time.sleep(2)
-        else:
-            style_map = {"1": (10, 0), "2": (6, 0), "3": (2, 0), "4": (0, 1), "5": (0, 0), "6": (22, 0)}
-            style_key = wallpaper_data.get('style', "1")
-            wallpaper_style, tile_wallpaper = style_map.get(style_key, style_map["1"])
-            try:
-                console.log(f"[dim]{get_text('applying_wallpaper', mode_name=mode_name)}...[/dim]")
-                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Control Panel\Desktop", 0, winreg.KEY_WRITE)
-                winreg.SetValueEx(key, "WallpaperStyle", 0, winreg.REG_SZ, str(wallpaper_style))
-                winreg.SetValueEx(key, "TileWallpaper", 0, winreg.REG_SZ, str(tile_wallpaper))
-                winreg.CloseKey(key)
-                ctypes.windll.user32.SystemParametersInfoW(20, 0, os.path.abspath(wallpaper_path), 3)
-                console.log(f"[bold white]{get_text('wallpaper_applied')}[/bold white]")
-            except Exception as e:
-                console.log(f"[{STYLE_ERROR}]{get_text('error_applying_wallpaper')}:[/{STYLE_ERROR}] {e}")
-    else:
-        console.log(f"[dim]{get_text('no_wallpaper_configured', mode_name=mode_name)}[/dim]")
+    core.apply_wallpaper(wallpaper_data, mode_name, RichReporter())
 
     with console.status(get_text('processing'), spinner="dots") as status:
-        manage_processes(apps_to_launch, apps_to_terminate, status)
+        core.manage_processes(apps_to_launch, apps_to_terminate, RichReporter(status))
     
     console.print(f"\n[bold white]{get_text('mode_activated_successfully', mode_name=mode_name)}[/bold white]")
     time.sleep(3)
@@ -920,7 +458,10 @@ def main():
         elif choice == "4": view_database()
         elif choice == "5": delete_app_screen()
         elif choice == "6": add_wallpaper_screen()
-        elif choice == "7": clear_system_junk(console)
+        elif choice == "7":
+            reporter = RichReporter()
+            core.clear_system_junk(reporter)
+            core.clean_orphan_virtual_desktops(reporter)
         elif choice == "8": restore_to_default()
         elif choice == "9": break
         else:

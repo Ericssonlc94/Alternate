@@ -1,71 +1,281 @@
-Para leitura em pt-br abra o [README_BR.md](https://github.com/Ericssonlc94/Severance-System/blob/main/README_BR.md)
+> Para ler em português: [README_BR.md](README_BR.md)
 
 # 🌀 Severance System
 
-The **Severance System** is a Windows tool inspired by the TV series *Severance*.  
-It allows you to switch between **Work Mode** and **Personal Mode**, automatically launching or closing applications, changing wallpapers, and cleaning up the system.
+A Windows tool inspired by the TV series *Severance*. It switches your machine
+between **Work Mode** and **Personal Mode**: closing the previous mode's apps,
+launching the new ones, swapping the wallpaper and clearing temp files.
+
+The project ships **two frontends over a single engine**: a PySide6 GUI (the
+main one) and the original `rich` CLI.
 
 ---
 
-## 📘 How to Use Severance System
+## 📁 Project structure
 
-### 1. Download
-- Download the executable from the official release:  
-  👉 [Severance System – Release](https://github.com/Ericssonlc94/Severance-System/releases/tag/severance_system_1.1)  
-- Extract it in a folder on your PC.
+```
+Severance-System/
+├── assets/                  read-only resources (bundled into the .exe)
+│   ├── lang/
+│   │   ├── pt.json
+│   │   └── en.json
+│   └── logo.ico
+├── data/                    user data (lives NEXT TO the .exe)
+│   ├── config.json
+│   ├── work_apps.json
+│   ├── personal_apps.json
+│   └── virtual_desktops_backup.json
+├── docs/
+│   └── manual_python_estudo.md
+├── logs/                    reserved (see "Known limitations")
+├── packaging/
+│   └── severance_system.spec
+├── src/
+│   ├── core.py              engine: processes, wallpaper, registry, cleanup
+│   ├── severance_system.py  CLI frontend (rich)
+│   └── gui/                 graphical frontend (PySide6)
+├── run.bat                  launches the CLI
+├── run_gui.bat              launches the GUI
+└── requirements.txt
+```
+
+### Why `data/` and `assets/` are separate
+
+This isn't cosmetic tidying — the two folders have different lifecycles once the
+app is packaged with PyInstaller.
+
+- **`assets/`** is read-only and ships *inside* the executable. At runtime
+  PyInstaller unpacks it into a fresh temporary folder on every launch
+  (`sys._MEIPASS`).
+- **`data/`** is writable and must **survive** across runs. If `config.json`
+  were bundled with the assets, every launch would start from an empty temp
+  folder and your settings would be gone.
+
+The path layer in `core.py` is what enforces this:
+
+| Function | Returns | When frozen (`.exe`) |
+|---|---|---|
+| `get_project_root()` | project root | the executable's folder |
+| `get_data_dir()` | `data/` (created if missing) | `data/` next to the `.exe` |
+| `get_logs_dir()` | `logs/` (created if missing) | `logs/` next to the `.exe` |
+| `get_asset_path(*p)` | `assets/...` | `sys._MEIPASS/assets/...` |
+
+`get_project_root()` resolves from `__file__`, **never** from the working
+directory. That's why the app finds `data/` and `assets/` no matter where it was
+started from — a shortcut, a terminal or a scheduler.
 
 ---
 
-### 2. Run the Program
-- Launch the program by double-clicking the executable or running it from the terminal and select your usual language.
+## ⚙️ Setup
+
+Requirements: **Windows** and **Python 3.13** (tested on 3.13.7 with PySide6
+6.11). The project uses Windows-only APIs (`winreg`, `ctypes.windll`,
+`winsound`).
+
+```bash
+python -m venv venv
+venv\Scripts\pip install -r requirements.txt
+```
 
 ---
 
-### 3. First Startup (User Registration)
-- On the **first launch**, the system will ask for your **user name (innie)**.  
-- After entering your name, a welcome message will be displayed and the **main menu** will appear.
+## ▶️ Running
+
+| Command | Opens |
+|---|---|
+| `run_gui.bat` | GUI (recommended) — uses `pythonw.exe`, no console behind it |
+| `run.bat` | text-mode CLI |
+
+Manually:
+
+```bash
+cd src
+..\venv\Scripts\python.exe -m gui                # GUI
+..\venv\Scripts\python.exe severance_system.py   # CLI
+```
+
+The working directory is `src\` so that `-m gui` finds the package and
+`import core` resolves without `PYTHONPATH`. The `data/` and `assets/` paths do
+not depend on it.
 
 ---
 
-### 4. Configure Applications for Each Mode
-Before starting any mode, you must define which applications will be used.
+## 🖥️ The graphical interface
 
-1. Select option **4. ADD APP TO DATABASE** from the main menu.  
-2. Choose whether to add the app to **Work Mode** or **Personal Mode**.  
-3. Locate the application’s executable file (`.exe` or `.vbs`).  
-4. Decide whether the application should **start minimized** or not.  
+**Boot sequence** — the ROBCO-LUMON INDUSTRIES startup, with phosphor glow,
+scanlines and typing effects. Skippable.
 
-Repeat this process to set up as many apps as you like for each mode.
+**Lock screen** — recreates the ROBCO Termlink password minigame from *Fallout*:
+words hidden in a memory dump, four attempts, and the *likeness* hint. Enabled
+in Settings › "Start locked".
+⚠️ **It is a joke, not security.** It protects and hides nothing: anyone who
+opens `data/config.json` or runs the CLI walks straight past it.
+
+**Control tab** — start Work Mode, start Personal Mode, clear cache and temp
+files. A log panel reports every process terminated and launched.
+
+**Database tab** — lists each mode's apps, with add and delete.
+
+**Settings (⚙)** — user name, language, theme, start locked, sound effects,
+wallpaper and restore defaults.
+
+**Themes** — `severance` (default) and `fallout`.
+
+**Tray** — the window minimizes to the system tray instead of closing.
+
+No action runs on the UI thread: everything goes through a `Worker` and comes
+back as Qt signals, so the window never freezes during a mode switch.
 
 ---
 
-### 5. (Optional) Configure Wallpapers
-You can assign a different wallpaper to each mode:
-
-1. Select option **6. ADD WALLPAPER**.  
-2. Choose the mode (**Work** or **Personal**).  
-3. Select the image file (`.jpg` or `.png`).  
-4. Pick the desired display style:  
-   - `1` → Fill  
-   - `2` → Fit  
-   - `3` → Stretch  
-   - `4` → Tile  
-   - `5` → Center  
-   - `6` → Span (multiple monitors)
-
----
-
-### 6. Additional Options
-Other menu options include:
+## ⌨️ The command-line interface
 
 | Option | Function |
-|--------|-----------|
-| **4. VIEW DATABASE** | Displays all apps added to each mode |
-| **5. DELETE APP FROM DATABASE** | Removes an app from a selected mode |
-| **7. CLEAR CACHE AND TEMP FILES** | Cleans up Windows temporary files |
-| **8. RESTORE DEFAULTS** | Deletes all settings and returns the system to its initial state |
-| **9. EXIT** | Closes the system |
+|---|---|
+| **1** | Start Work Mode |
+| **2** | Start Personal Mode |
+| **3** | Add app to database |
+| **4** | View database |
+| **5** | Delete app from database |
+| **6** | Add wallpaper |
+| **7** | Clear cache/temp files **+ orphan virtual desktops** |
+| **8** | Restore defaults |
+| **9** | Exit |
+| **\*** | Toggle language (pt ⇄ en) |
 
 ---
 
-⚡ Once the setup is complete, you can easily switch between **Work Mode** and **Personal Mode** using options **1** and **2** in the main menu.
+## 🗂️ Configuration and data
+
+### `data/config.json`
+
+| Field | Description |
+|---|---|
+| `language` | `pt` or `en` |
+| `user_name` | your name (*innie*) |
+| `active_mode` / `active_mode_key` | last mode started |
+| `work_wallpaper` / `personal_wallpaper` | `{ "path": ..., "style": "1".."6" }` |
+| `theme` | `severance` or `fallout` |
+| `start_locked` | open on the lock screen |
+| `sound_enabled` | terminal sound effects |
+| `wallpaper_walk_desktops` | walk the virtual desktops when applying the wallpaper (default: `true`) |
+
+### `data/work_apps.json` and `data/personal_apps.json`
+
+```json
+[
+    {
+        "name": "DROPBOX",
+        "path": "C:/Program Files (x86)/Dropbox/Client/Dropbox.exe",
+        "close_after_launch": true,
+        "requires_admin": true
+    }
+]
+```
+
+| Field | Effect |
+|---|---|
+| `name` | display label; also matches the window for `close_after_launch` |
+| `path` | path to the `.exe` or `.vbs` (`.vbs` runs via `wscript.exe`) |
+| `close_after_launch` | closes the app's **window** after launch (Alt+F4), leaving the background process alive |
+| `requires_admin` | launches elevated (`runas`), triggering a UAC prompt |
+
+Apps present in **both** modes are not terminated on a switch — only those
+exclusive to the previous mode. Steam and Dropbox get special handling
+(`-silent`, more aggressive termination, output silencing).
+
+### Wallpaper styles
+
+| Code | Style |
+|---|---|
+| `1` | Fill |
+| `2` | Fit |
+| `3` | Stretch |
+| `4` | Tile |
+| `5` | Center |
+| `6` | Span (multiple monitors) |
+
+#### Multiple virtual desktops
+
+The wallpaper is applied to **every** virtual desktop, not just the active one.
+That takes a detour: `SystemParametersInfoW` only repaints the active desktop,
+and writing each GUID's `Wallpaper` registry key is **not enough** — Explorer
+keeps every desktop's wallpaper in memory and only reads those keys at session
+start.
+
+So the system does both: it writes the registry (so the value is correct at the
+next login) and **walks the desktops** with `Ctrl+Win+Arrow`, actually applying
+the wallpaper on each one and returning to the starting desktop. The visible
+effect is the screen cycling for a few seconds during a mode switch.
+
+The walk only happens when there is something to change: if the target wallpaper
+(and style) is already in effect on every desktop, the step is skipped entirely.
+Starting the same mode twice in a row cycles nothing.
+
+To disable the walk — keeping only the active desktop plus the registry — add
+this to `data/config.json`:
+
+```json
+"wallpaper_walk_desktops": false
+```
+
+### Translations
+
+Every file in `assets/lang/` becomes a language automatically (the filename is
+the language code). To add one, copy `pt.json`, translate the values and save it
+as e.g. `es.json`.
+
+---
+
+## 🧱 Architecture
+
+The engine knows nothing about `rich`, Qt or languages. It reports what it is
+doing through the `core.Reporter` contract, and each frontend implements its own:
+
+```
+severance_system.py ── RichReporter ─┐
+                                     ├─→ core.Reporter ──→ core.py
+gui/ ───────────────── QtReporter ───┘                     (processes, registry,
+                                                            wallpaper, cleanup)
+```
+
+| Module in `src/gui/` | Role |
+|---|---|
+| `__main__.py` / `app.py` | entry point (`python -m gui`) |
+| `main_window.py` | `QStackedWidget`: boot → lock → tabs |
+| `boot.py` | ROBCO-LUMON startup sequence |
+| `lockscreen.py` | Termlink terminal minigame |
+| `dialogs.py` | app, settings and wallpaper forms |
+| `effects.py` | CRT overlay: phosphor, scanlines, sweep |
+| `theme.py` | Severance/Fallout palettes (QSS via `string.Template`) |
+| `sound.py` | async in-memory WAV tones |
+| `reporter.py` | `Worker` + engine → Qt signal bridge |
+| `i18n.py` | runtime translation, stripping `rich` markup |
+
+---
+
+## 📦 Building the executable
+
+From the project **root**:
+
+```bash
+venv\Scripts\pyinstaller packaging\severance_system.spec
+```
+
+The `.spec` bundles `assets/` and deliberately leaves `data/` out, so the user's
+configuration sits beside the executable and survives updates.
+
+---
+
+## ⚠️ Known limitations
+
+- **The build recipe produces the CLI only.** The `.spec` targets
+  `src/severance_system.py`; there is no GUI build yet.
+- **`logs/` is unused.** The folder and `core.get_logs_dir()` exist, but the
+  project has no logging system — it is scaffolding, not a working feature.
+- **Orphan virtual desktop cleanup is CLI-only** (option 7). The GUI clears
+  cache and temp files but does not call `clean_orphan_virtual_desktops()`.
+- **Windows only.** `winreg`, `ctypes.windll` and `winsound` have no equivalent
+  on other platforms.
+- Temp cleanup skips files locked by the system — seeing several "permission
+  denied" entries in the log is expected.

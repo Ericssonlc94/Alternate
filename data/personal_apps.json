@@ -5,25 +5,21 @@
         "close_after_launch": true
     },
     {
-        "name": "DRIVE",
-        "path": "C:/Program Files/Google/Drive File Stream/113.0.1.0/GoogleDriveFS.exe",
-        "close_after_launch": true
-    },
-    {
-        "name": "BRAVE",
-        "path": "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe",
-        "close_after_launch": false
-    },
-    {
         "name": "STEAM",
         "path": "C:/Program Files (x86)/Steam/steam.exe",
         "close_after_launch": true,
         "requires_admin": false
     },
     {
-        "name": "RYZENTEST",
-        "path": "C:/Users/ericssonlc/Downloads/ryzentest/RyzenTest0.exe",
+        "name": "LOGITECHHUB",
+        "path": "C:/Program Files/LGHUB/system_tray/lghub_system_tray.exe",
+        "close_after_launch": false,
+        "requires_admin": false
+    },
+    {
+        "name": "DRIVE",
+        "path": "C:/Program Files/Google/Drive File Stream/121.0.1.0/GoogleDriveFS.exe",
         "close_after_launch": true,
-        "requires_admin": true
+        "requires_admin": false
     }
 ]
