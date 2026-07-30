@@ -1,8 +1,10 @@
 # -*- mode: python ; coding: utf-8 -*-
 #
-# Receita de build da CLI. Rode a partir da RAIZ do projeto:
+# Receita de build da CLI:
 #     pyinstaller packaging/severance_system.spec
-# Os caminhos abaixo sao relativos ao diretorio de onde o comando e chamado.
+#
+# Caminhos ancorados em SPECPATH (a pasta deste arquivo): o PyInstaller resolve
+# relativos do .spec a partir dele, entao "src/..." viraria "packaging/src/...".
 #
 # `pathex` coloca src/ no caminho de busca para que o "import core" do
 # severance_system.py resolva; `datas` embarca assets/ (traducoes e logo), que
@@ -10,12 +12,26 @@
 # A pasta data/ NAO entra aqui de proposito: config e bancos de apps sao dados
 # do usuario e devem viver ao lado do executavel, nao dentro dele.
 
+import os
+
+ROOT = os.path.abspath(os.path.join(SPECPATH, '..'))
+SRC = os.path.join(ROOT, 'src')
+
+# O logo foi removido do repositorio. Referencia-lo direto quebraria o build;
+# se voltar, e embarcado e vira o icone do executavel.
+ICON = os.path.join(ROOT, 'assets', 'logo.ico')
+has_icon = os.path.exists(ICON)
+
+datas = [(os.path.join(ROOT, 'assets', 'lang'), 'assets/lang')]
+if has_icon:
+    datas.append((ICON, 'assets'))
+
 
 a = Analysis(
-    ['src/severance_system.py'],
-    pathex=['src'],
+    [os.path.join(SRC, 'severance_system.py')],
+    pathex=[SRC],
     binaries=[],
-    datas=[('assets', 'assets')],
+    datas=datas,
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -33,7 +49,7 @@ exe = EXE(
     a.datas,
     [],
     name='severance_system',
-    icon='assets/logo.ico',
+    icon=ICON if has_icon else None,
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

@@ -275,23 +275,50 @@ gui/ ───────────────── QtReporter ───┘
 
 ---
 
-## 📦 Building the executable
+## 📦 Building the executable and installer
 
-From the project **root**:
+The short path is `packaging\build_installer.bat`, which runs both steps and
+reports clearly if anything is missing. Manually:
 
 ```bash
-venv\Scripts\pyinstaller packaging\severance_system.spec
+venv\Scripts\pyinstaller packaging\severance_gui.spec      # GUI -> dist\SeveranceSystem.exe
+venv\Scripts\pyinstaller packaging\severance_system.spec   # CLI -> dist\severance_system.exe
+iscc packaging\installer.iss                               # installer -> dist\...-setup.exe
 ```
 
-The `.spec` bundles `assets/` and deliberately leaves `data/` out, so the user's
-configuration sits beside the executable and survives updates.
+The GUI executable is **~60 MB**: it carries all of Python and PySide6 inside,
+which is why it runs on machines with nothing installed.
+
+The installer needs [Inno Setup 6](https://jrsoftware.org/isdl.php), which is
+free. Without it the `.bat` still produces the executable in `dist\`, which works
+on its own — the installer only adds shortcuts and uninstall support.
+
+**Per-user install, deliberately.** The default target is
+`%LOCALAPPDATA%\Programs\Severance System`, not Program Files. That avoids a UAC
+prompt at install time and keeps the target writable, so `data/` lives beside the
+executable and the whole folder can be carried to another PC.
+
+**Where the data ends up.** The `.spec` files bundle `assets/` and leave `data/`
+out — PyInstaller wipes its temp folder on every exit, so anything written there
+would be lost. If the program still ends up in a protected folder it does not
+break: `core._writable_dir` probes for write access and falls back to
+`%APPDATA%\Severance System\`.
+
+Uninstalling preserves `data/` on purpose — updating does not wipe your settings.
+To start clean, delete the folder manually.
 
 ---
 
 ## ⚠️ Known limitations
 
-- **The build recipe produces the CLI only.** The `.spec` targets
-  `src/severance_system.py`; there is no GUI build yet.
+- **The installer is not code-signed.** Windows SmartScreen will warn on first
+  run ("More info" → "Run anyway"). Fixing that requires a paid code-signing
+  certificate.
+- **`assets/logo.ico` is not in the repository**, so the executable and installer
+  ship with the default Windows icon and the GUI draws a themed square instead.
+  The `.spec` files handle its absence without breaking; put the file back in
+  `assets/` and the icon returns (also uncomment `SetupIconFile` in
+  `installer.iss`).
 - **`logs/` is unused.** The folder and `core.get_logs_dir()` exist, but the
   project has no logging system — it is scaffolding, not a working feature.
 - **Orphan virtual desktop cleanup is CLI-only** (option 7). The GUI clears

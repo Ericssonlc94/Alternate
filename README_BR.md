@@ -273,23 +273,50 @@ gui/ ───────────────── QtReporter ───┘
 
 ---
 
-## 📦 Gerar o executável
+## 📦 Gerar o executável e o instalador
 
-A partir da **raiz** do projeto:
+O caminho curto é `packaging\build_installer.bat`, que faz os dois passos e avisa
+com clareza se algo faltar. Manualmente:
 
 ```bash
-venv\Scripts\pyinstaller packaging\severance_system.spec
+venv\Scripts\pyinstaller packaging\severance_gui.spec      # GUI  -> dist\SeveranceSystem.exe
+venv\Scripts\pyinstaller packaging\severance_system.spec   # CLI  -> dist\severance_system.exe
+iscc packaging\installer.iss                               # instalador -> dist\...-setup.exe
 ```
 
-O `.spec` embarca `assets/` e mantém `data/` de fora — de propósito, para que a
-configuração do usuário fique ao lado do executável e sobreviva às atualizações.
+O executável da GUI tem **~60 MB**: leva o Python e o PySide6 inteiros dentro de
+si, e por isso roda em máquinas sem nada instalado.
+
+O instalador exige o [Inno Setup 6](https://jrsoftware.org/isdl.php), que é
+gratuito. Sem ele, o `.bat` ainda entrega o executável de `dist\`, que já
+funciona sozinho — o instalador só acrescenta atalhos e desinstalação.
+
+**Instalação por usuário, de propósito.** O destino padrão é
+`%LOCALAPPDATA%\Programs\Severance System`, e não Arquivos de Programas. Isso
+evita o UAC na instalação e deixa o destino gravável, então `data/` fica ao lado
+do executável e a pasta inteira pode ser levada para outro PC.
+
+**Onde os dados param.** Os `.spec` embarcam `assets/` e mantêm `data/` de fora —
+o PyInstaller apaga a pasta temporária a cada saída, então qualquer coisa gravada
+lá se perderia. Se ainda assim o programa acabar numa pasta protegida, ele não
+quebra: `core._writable_dir` testa a escrita e cai para
+`%APPDATA%\Severance System\`.
+
+Desinstalar preserva `data/` de propósito — atualizar não apaga seus ajustes.
+Para zerar, apague a pasta manualmente.
 
 ---
 
 ## ⚠️ Limitações conhecidas
 
-- **A receita de build gera apenas a CLI.** O `.spec` aponta para
-  `src/severance_system.py`; ainda não há build da GUI.
+- **O instalador não é assinado digitalmente.** O SmartScreen do Windows vai
+  alertar na primeira execução ("Mais informações" → "Executar assim mesmo").
+  Resolver isso exige um certificado de assinatura de código pago.
+- **`assets/logo.ico` não está no repositório**, então o executável e o
+  instalador saem com o ícone padrão do Windows e a GUI desenha um quadrado da
+  cor do tema. Os `.spec` tratam a ausência sem quebrar; devolvendo o arquivo a
+  `assets/`, o ícone volta sozinho (e basta descomentar `SetupIconFile` no
+  `installer.iss`).
 - **`logs/` não é usada por nada.** A pasta e o `core.get_logs_dir()` existem,
   mas o projeto não tem sistema de log — é estrutura pronta, não recurso ativo.
 - **A limpeza de desktops virtuais órfãos só existe na CLI** (opção 7). A GUI

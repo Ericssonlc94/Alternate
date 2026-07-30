@@ -67,6 +67,10 @@ DATA_DIR = "data"
 ASSETS_DIR = "assets"
 LOGS_DIR = "logs"
 
+# Usado só no plano B de gravação (ver `_writable_dir`), para nomear a pasta em
+# %APPDATA%. Não é o título da janela — esse vem das traduções.
+APP_NAME = "Severance System"
+
 
 def get_project_root():
     """Raiz do projeto — a pasta que contém data/, assets/, logs/ e src/.
@@ -81,18 +85,48 @@ def get_project_root():
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+def _can_write(path):
+    """Cria o diretório e confirma que dá para gravar nele.
+
+    Não basta `os.makedirs`: em Arquivos de Programas a pasta pode até existir e
+    ainda assim recusar escrita para um usuário comum. Só um arquivo de teste
+    responde de verdade.
+    """
+    try:
+        os.makedirs(path, exist_ok=True)
+        probe = os.path.join(path, ".write_test")
+        with open(probe, "w"):
+            pass
+        os.remove(probe)
+        return True
+    except OSError:
+        return False
+
+
+def _writable_dir(name):
+    """Devolve a pasta gravável para `name` (data/, logs/).
+
+    Preferência é ao lado do programa — é o modo portátil, e o que vale rodando
+    do código-fonte. Instalado numa pasta protegida, gravar ali falharia; nesse
+    caso cai para %APPDATA%\\Severance System\\<name>, que é sempre do usuário.
+    """
+    beside = os.path.join(get_project_root(), name)
+    if _can_write(beside):
+        return beside
+    base = os.environ.get("APPDATA") or os.path.expanduser("~")
+    fallback = os.path.join(base, APP_NAME, name)
+    os.makedirs(fallback, exist_ok=True)
+    return fallback
+
+
 def get_data_dir():
     """Pasta dos dados graváveis (config e bancos de apps); criada se faltar."""
-    path = os.path.join(get_project_root(), DATA_DIR)
-    os.makedirs(path, exist_ok=True)
-    return path
+    return _writable_dir(DATA_DIR)
 
 
 def get_logs_dir():
     """Pasta de logs; criada se faltar."""
-    path = os.path.join(get_project_root(), LOGS_DIR)
-    os.makedirs(path, exist_ok=True)
-    return path
+    return _writable_dir(LOGS_DIR)
 
 
 def get_asset_path(*parts):
