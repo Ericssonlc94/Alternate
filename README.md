@@ -137,7 +137,9 @@ the Termlink terminal.*
 
 **Tray** — by default the X minimizes the window to the system tray instead of
 quitting, and the real exit lives in the tray menu. Unchecking *"Minimize to tray
-on close"* in Settings makes the X quit the program.
+on close"* in Settings makes the X quit the program. Hovering the icon shows the
+active mode in the tooltip (`WORK`, `PERSONAL` or `NONE`) — no need to open the
+window.
 
 **First run** — with no name on record, the boot sequence grants no access: it
 checks the credentials and hands over to the enrollment screen. The menu only

@@ -135,7 +135,9 @@ ao terminal Termlink.*
 
 **Bandeja** — por padrão o X minimiza a janela para a bandeja em vez de encerrar,
 e a saída definitiva fica no menu dela. Desmarcando *"Ao fechar, minimizar para a
-bandeja"* nos Ajustes, o X passa a encerrar o programa.
+bandeja"* nos Ajustes, o X passa a encerrar o programa. Passando o mouse sobre o
+ícone, o tooltip mostra o modo ativo (`TRABALHO`, `PESSOAL` ou `NENHUM`) — sem
+precisar abrir a janela.
 
 **Primeiro uso** — sem nome gravado, a abertura não concede acesso: ela verifica
 as credenciais e entrega a tela de cadastro. O menu só aparece depois do nome
