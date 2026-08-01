@@ -18,16 +18,20 @@ from .theme import THEMES
 
 
 class AppDialog(QDialog):
-    """Cadastro de um aplicativo em um dos bancos.
+    """Cadastro ou edição de um aplicativo em um dos bancos.
 
     `result_data()` devolve (nome_do_banco, dicionário_do_app) no formato que
     `core.save_apps` já espera.
+
+    Passando `app`, o formulário abre preenchido e vira edição — inclusive do
+    banco: trocar o combo move o aplicativo de TRABALHO para PESSOAL (ou o
+    contrário), e quem grava é `MainWindow.edit_app`.
     """
 
-    def __init__(self, translator, default_db=core.WORK_DB, parent=None):
+    def __init__(self, translator, default_db=core.WORK_DB, parent=None, app=None):
         super().__init__(parent)
         self._t = translator
-        self.setWindowTitle(translator("add_app_title"))
+        self.setWindowTitle(translator("edit_app_title" if app else "add_app_title"))
         self.setMinimumWidth(520)
 
         self.db_combo = QComboBox()
@@ -48,6 +52,12 @@ class AppDialog(QDialog):
 
         self.admin_check = QCheckBox(translator("gui_requires_admin"))
         self.close_check = QCheckBox(translator("gui_close_after_launch"))
+
+        if app:
+            self.name_edit.setText(app.get("name", ""))
+            self.path_edit.setText(app.get("path", ""))
+            self.admin_check.setChecked(bool(app.get("requires_admin")))
+            self.close_check.setChecked(bool(app.get("close_after_launch")))
 
         form = QFormLayout()
         form.addRow(translator("gui_target_db"), self.db_combo)

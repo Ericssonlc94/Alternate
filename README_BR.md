@@ -120,7 +120,11 @@ temporários. Um painel de log mostra cada processo encerrado/iniciado.
 *O modo ativo aparece em destaque acima dos botões, e o registro de atividade
 mostra o que o núcleo está fazendo em tempo real.*
 
-**Aba Banco de Dados** — lista os apps de cada modo, com adicionar e excluir.
+**Aba Banco de Dados** — lista os apps de cada modo, com adicionar, editar e
+excluir. *Editar* (ou duplo clique no item) abre o mesmo formulário preenchido:
+dá para corrigir nome, caminho e as marcações de administrador e "fechar após
+iniciar" — e, trocando o banco no formulário, mover o app entre TRABALHO e
+PESSOAL.
 
 **Ajustes (⚙)** — nome de usuário, idioma, tema, efeitos sonoros, minimizar para
 a bandeja ao fechar, iniciar bloqueado, papel de parede e restaurar ao padrão.

@@ -216,15 +216,21 @@ class MainWindow(QMainWindow):
         self.db_combo.currentIndexChanged.connect(self.refresh_app_lists)
         self.add_button = QPushButton(self.t("gui_add"))
         self.add_button.clicked.connect(self.add_app)
+        self.edit_button = QPushButton(self.t("gui_edit"))
+        self.edit_button.clicked.connect(self.edit_app)
         self.delete_button = QPushButton(self.t("gui_delete"))
         self.delete_button.setObjectName("Danger")
         self.delete_button.clicked.connect(self.delete_app)
         top.addWidget(self.db_combo, 1)
         top.addWidget(self.add_button)
+        top.addWidget(self.edit_button)
         top.addWidget(self.delete_button)
         panel_layout.addLayout(top)
 
         self.app_list = QListWidget()
+        # Duplo clique é o atalho esperado para editar; o botão fica para quem
+        # procura a ação na barra.
+        self.app_list.itemDoubleClicked.connect(lambda _item: self.edit_app())
         panel_layout.addWidget(self.app_list, 1)
 
         layout.addWidget(panel, 1)
@@ -492,18 +498,64 @@ class MainWindow(QMainWindow):
         else:
             self.refresh_app_lists()
 
-    def delete_app(self):
+    def _selected_app(self):
+        """(banco, posição, lista) do item selecionado, ou None.
+
+        Relê o banco do disco em vez de confiar na lista da tela: a CLI pode ter
+        mexido nos arquivos enquanto a janela estava aberta. Se a posição não
+        existir mais, a lista é recarregada e nada é devolvido.
+        """
         item = self.app_list.currentItem()
         if item is None:
             self._log(self.t("gui_no_selection"), "detail")
-            return
+            return None
 
         db_name = self.db_combo.currentData()
         position = self.app_list.row(item)
         apps = core.load_apps(db_name)
         if not 0 <= position < len(apps):
             self.refresh_app_lists()
+            return None
+        return db_name, position, apps
+
+    def edit_app(self):
+        selection = self._selected_app()
+        if selection is None:
             return
+        db_name, position, apps = selection
+
+        dialog = AppDialog(self.t, db_name, self, app=apps[position])
+        if dialog.exec() != AppDialog.Accepted:
+            self._log(self.t("operation_cancelled"), "detail")
+            return
+
+        target_db, app = dialog.result_data()
+        index = self.db_combo.findData(target_db)
+        if target_db == db_name:
+            apps[position] = app
+            core.save_apps(db_name, apps)
+            self._log(self.t("app_updated_success", name=app["name"]), "info")
+        else:
+            # Troca de banco: sai de um arquivo e entra no outro.
+            apps.pop(position)
+            core.save_apps(db_name, apps)
+            target_apps = core.load_apps(target_db)
+            target_apps.append(app)
+            core.save_apps(target_db, target_apps)
+            self._log(self.t("app_moved_success", name=app["name"],
+                             db=self.db_combo.itemText(index)), "info")
+
+        # Acompanha o app se ele mudou de banco; `setCurrentIndex` já recarrega.
+        if index >= 0 and index != self.db_combo.currentIndex():
+            self.db_combo.setCurrentIndex(index)
+        else:
+            self.refresh_app_lists()
+
+    def delete_app(self):
+        selection = self._selected_app()
+        if selection is None:
+            return
+        db_name, position, apps = selection
 
         name = apps[position]["name"]
         confirm = QMessageBox.question(
@@ -621,6 +673,7 @@ class MainWindow(QMainWindow):
         self.personal_button.setText(self.t("menu_option_2"))
         self.clean_button.setText(self.t("menu_option_7"))
         self.add_button.setText(self.t("gui_add"))
+        self.edit_button.setText(self.t("gui_edit"))
         self.delete_button.setText(self.t("gui_delete"))
         self.settings_button.setToolTip(self.t("gui_settings_tooltip"))
         self.lock_button.setToolTip(self.t("gui_lock_tooltip"))

@@ -121,7 +121,10 @@ files. A log panel reports every process terminated and launched.
 *The active mode is highlighted above the buttons, and the activity log shows
 what the engine is doing in real time.*
 
-**Database tab** — lists each mode's apps, with add and delete.
+**Database tab** — lists each mode's apps, with add, edit and delete. *Edit* (or
+a double click on the item) opens the same form prefilled: name, path and the
+administrator / "close after launch" flags can be fixed — and switching the
+database in the form moves the app between WORK and PERSONAL.
 
 **Settings (⚙)** — user name, language, theme, sound effects, minimize to tray on
 close, start locked, wallpaper and restore defaults.
