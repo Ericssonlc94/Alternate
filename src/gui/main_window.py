@@ -276,7 +276,7 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
     def _build_tray(self):
         self.tray = QSystemTrayIcon(self._app_icon(), self)
-        self.tray.setToolTip(self.t("gui_window_title"))
+        self._refresh_tray_tooltip()
 
         menu = QMenu()
         self.show_action = QAction(self.t("gui_tray_show"), self)
@@ -306,6 +306,11 @@ class MainWindow(QMainWindow):
         painter.drawRect(8, 8, 47, 47)
         painter.end()
         return QIcon(pixmap)
+
+    def _refresh_tray_tooltip(self):
+        """Mostra o modo ativo ao passar o mouse sobre o ícone da bandeja."""
+        active = self.config.get("active_mode") or self.t("none_mode")
+        self.tray.setToolTip(self.t("gui_tray_tooltip", mode_name=active))
 
     def _on_tray_activated(self, reason):
         if reason in (QSystemTrayIcon.Trigger, QSystemTrayIcon.DoubleClick):
@@ -584,6 +589,7 @@ class MainWindow(QMainWindow):
 
         active = self.config.get("active_mode") or self.t("none_mode")
         self.active_mode_label.setText(active)
+        self._refresh_tray_tooltip()
 
         # Configurações gravadas pela CLI só têm o nome traduzido; nesse caso
         # deduz a chave comparando com os nomes do idioma atual.
@@ -622,7 +628,6 @@ class MainWindow(QMainWindow):
         self.db_combo.setItemText(1, self.t("personal_mode_col"))
         self.show_action.setText(self.t("gui_tray_show"))
         self.quit_action.setText(self.t("gui_tray_quit"))
-        self.tray.setToolTip(self.t("gui_window_title"))
         self.lock_screen.retranslate()
         self.enroll_screen.retranslate()
         self._refresh_header_status()
