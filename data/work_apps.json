@@ -1,0 +1,20 @@
+[
+    {
+        "name": "Dropbox",
+        "path": "C:\\Program Files (x86)\\Dropbox\\Client\\Dropbox.exe",
+        "requires_admin": true,
+        "close_after_launch": true
+    },
+    {
+        "name": "Drive",
+        "path": "C:\\Program Files\\Google\\Drive File Stream\\128.0.0.0\\GoogleDriveFS.exe",
+        "requires_admin": true,
+        "close_after_launch": true
+    },
+    {
+        "name": "Serpro",
+        "path": "C:\\Program Files (x86)\\Assinador Serpro\\exec_assinador.vbs",
+        "requires_admin": true,
+        "close_after_launch": false
+    }
+]

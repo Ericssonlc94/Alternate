@@ -1,0 +1,26 @@
+[
+    {
+        "name": "Drive",
+        "path": "C:\\Program Files\\Google\\Drive File Stream\\128.0.0.0\\GoogleDriveFS.exe",
+        "requires_admin": true,
+        "close_after_launch": true
+    },
+    {
+        "name": "Lghub_System_Tray",
+        "path": "C:\\Program Files\\LGHUB\\system_tray\\lghub_system_tray.exe",
+        "requires_admin": true,
+        "close_after_launch": true
+    },
+    {
+        "name": "Logitech Gaming",
+        "path": "C:\\Program Files\\Logitech\\Gaming Software\\LWEMon.exe",
+        "requires_admin": true,
+        "close_after_launch": true
+    },
+    {
+        "name": "Steam",
+        "path": "C:\\Program Files (x86)\\Steam\\steam.exe",
+        "requires_admin": false,
+        "close_after_launch": false
+    }
+]

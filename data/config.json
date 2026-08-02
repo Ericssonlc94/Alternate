@@ -1,0 +1,18 @@
+{
+    "user_name": "Ericsson",
+    "active_mode": "PESSOAL",
+    "active_mode_key": "personal",
+    "language": "pt",
+    "theme": "severance",
+    "start_locked": true,
+    "sound_enabled": false,
+    "close_to_tray": true,
+    "work_wallpaper": {
+        "path": "C:\\Users\\ericssonlc\\Pictures\\a_graphic_of_a_wave.png",
+        "style": "2"
+    },
+    "personal_wallpaper": {
+        "path": "C:\\Users\\ericssonlc\\Pictures\\1338182.png",
+        "style": "2"
+    }
+}
