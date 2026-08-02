@@ -168,6 +168,9 @@ back as Qt signals, so the window never freezes during a mode switch.
 | **9** | Exit |
 | **\*** | Toggle language (pt ⇄ en) |
 
+Editing an app already on record is GUI-only; from the command line the way
+around it is delete and add again.
+
 ---
 
 ## 🗂️ Configuration and data
@@ -271,7 +274,7 @@ gui/ ───────────────── QtReporter ───┘
 | `main_window.py` | `QStackedWidget`: boot → lock → tabs |
 | `boot.py` | ROBCO-LUMON startup sequence |
 | `lockscreen.py` | Termlink terminal minigame |
-| `dialogs.py` | app, settings and wallpaper forms |
+| `dialogs.py` | app forms (add and edit), settings and wallpaper forms |
 | `effects.py` | CRT overlay: phosphor, scanlines, sweep |
 | `theme.py` | Severance/Fallout palettes (QSS via `string.Template`) |
 | `sound.py` | async in-memory WAV tones |

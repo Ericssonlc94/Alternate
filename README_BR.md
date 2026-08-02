@@ -167,6 +167,9 @@ eventos voltam como *signals* Qt. A janela não congela durante uma troca de mod
 | **9** | Sair |
 | **\*** | Alternar idioma (pt ⇄ en) |
 
+Editar um app já cadastrado existe só na interface gráfica; pela linha de comando
+o caminho é excluir e adicionar de novo.
+
 ---
 
 ## 🗂️ Configuração e dados
@@ -270,7 +273,7 @@ gui/ ───────────────── QtReporter ───┘
 | `main_window.py` | `QStackedWidget`: boot → bloqueio → abas |
 | `boot.py` | abertura ROBCO-LUMON |
 | `lockscreen.py` | minigame do terminal Termlink |
-| `dialogs.py` | formulários de app, ajustes e papel de parede |
+| `dialogs.py` | formulários de app (cadastro e edição), ajustes e papel de parede |
 | `effects.py` | overlay CRT: fósforo, scanlines, varredura |
 | `theme.py` | paletas Severance/Fallout (QSS via `string.Template`) |
 | `sound.py` | tons WAV assíncronos em memória |
