@@ -2,6 +2,8 @@
 
 # 🌀 Alternate
 
+*The original names have been changed.
+
 A Windows tool inspired by the TV series *Severance*. It switches your machine
 between **Work Mode** and **Personal Mode**: closing the previous mode's apps,
 launching the new ones, swapping the wallpaper and clearing temp files.
