@@ -1,8 +1,8 @@
 > Para ler em português: [README_BR.md](README_BR.md)
 
-# 🌀 Alternate
-
 *The original names have been changed.
+
+# 🌀 Alternate
 
 A Windows tool inspired by the TV series *Severance*. It switches your machine
 between **Work Mode** and **Personal Mode**: closing the previous mode's apps,
