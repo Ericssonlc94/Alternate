@@ -116,6 +116,16 @@ dá para corrigir nome, caminho e as marcações de administrador e "fechar apó
 iniciar" — e, trocando o banco no formulário, mover o app entre TRABALHO e
 PESSOAL.
 
+![Aba Banco de Dados com o MODO DE TRABALHO selecionado: cada item mostra o nome, as marcações "Requer Admin" e "Fechar janela após iniciar" e o caminho completo do executável](assets/work%20mode.png)
+
+![A mesma aba com o MODO PESSOAL selecionado, listando os apps desse modo](assets/personal%20mode.png)
+
+*A lista suspensa escolhe qual banco aparece. Cada linha traz o nome, as
+marcações em vigor e o caminho completo — então entradas `.vbs` e apps que pedem
+UAC ficam visíveis sem abrir o formulário. Um app que está nos **dois** modos,
+como o Drive acima, sobrevive à troca: só o que é exclusivo do modo anterior é
+encerrado.*
+
 **Ajustes (⚙)** — nome de usuário, idioma, tema, efeitos sonoros, minimizar para
 a bandeja ao fechar, iniciar bloqueado, papel de parede e restaurar ao padrão.
 

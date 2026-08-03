@@ -116,6 +116,16 @@ a double click on the item) opens the same form prefilled: name, path and the
 administrator / "close after launch" flags can be fixed — and switching the
 database in the form moves the app between WORK and PERSONAL.
 
+![Database tab with WORK MODE selected: each entry shows the name, the "Requires Admin" and "Close window after launch" flags, and the full executable path](assets/work%20mode.png)
+
+![The same tab with PERSONAL MODE selected, listing that mode's apps](assets/personal%20mode.png)
+
+*The dropdown picks which database is on screen. Each row carries the name, the
+flags in effect and the full path — so `.vbs` entries and apps that need a UAC
+prompt are visible without opening the form. An app listed in **both** modes,
+like Drive above, survives a switch: only what is exclusive to the previous mode
+gets terminated.*
+
 **Settings (⚙)** — user name, language, theme, sound effects, minimize to tray on
 close, start locked, wallpaper and restore defaults.
 
