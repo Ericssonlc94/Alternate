@@ -103,18 +103,6 @@ not depend on it.
 **Boot sequence** — the LUMEN INDUSTRIES startup, with phosphor glow,
 scanlines and typing effects. Skippable.
 
-**Lock screen** — recreates the TecCo Termlink password minigame from *Fallout*:
-words hidden in a memory dump, four attempts, and the *likeness* hint. Enabled
-in Settings › "Start locked".
-⚠️ **It is a joke, not security.** It protects and hides nothing: anyone who
-opens `data/config.json` walks straight past it.
-
-![Lock screen in the Fallout theme: the TecCo INDUSTRIES (TM) TERMLINK PROTOCOL header, the attempts left, the memory dump in two columns of hex addresses and garbled characters, and the attempt log on the right](assets/lockscreen.png)
-
-*The header carries the TecCo brand — the Fallout theme's counterpart to Lumen.
-Words hide in the dump (`STORAGE`, `CAPSULE`, `REACTOR`…); each wrong guess
-answers with the* likeness *count instead of a plain rejection.*
-
 **Control tab** — start Work Mode, start Personal Mode, clear cache and temp
 files. A log panel reports every process terminated and launched.
 
@@ -139,6 +127,20 @@ Settings.
 *The Fallout theme swaps cyan for green phosphor and adds the **padlock button**
 (🔒) next to the gear — it appears only in this theme, because it is what opens
 the Termlink terminal.*
+
+**Lock screen — Fallout only.** Behind that padlock is the TecCo Termlink
+password minigame: words hidden in a memory dump, four attempts, and the
+*likeness* hint. Besides the padlock, Settings › "Start locked" makes it come up
+on the next launch.
+
+![Lock screen in the Fallout theme: the TecCo INDUSTRIES (TM) TERMLINK PROTOCOL header, the attempts left, the memory dump in two columns of hex addresses and garbled characters, and the attempt log on the right](assets/lockscreen.png)
+
+*The header carries the TecCo brand — the Fallout theme's counterpart to Lumen.
+Words hide in the dump (`STORAGE`, `CAPSULE`, `REACTOR`…); each wrong guess
+answers with the* likeness *count instead of a plain rejection.*
+
+⚠️ **It is a joke, not security.** It protects and hides nothing: anyone who
+opens `data/config.json` walks straight past it.
 
 **Tray** — by default the X minimizes the window to the system tray instead of
 quitting, and the real exit lives in the tray menu. Unchecking *"Minimize to tray

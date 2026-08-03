@@ -102,18 +102,6 @@ dependem disso.
 **Abertura** — o boot da LUMEN INDUSTRIES, com efeito de fósforo,
 scanlines e digitação. Pode ser pulada.
 
-**Tela de bloqueio** — reproduz o minigame de senha do terminal TecCo Termlink
-(*Fallout*): palavras escondidas num despejo de memória, quatro tentativas e a
-dica de *likeness*. Ativável em Ajustes › "Iniciar bloqueado".
-⚠️ **É uma brincadeira, não segurança.** Não protege nem esconde nada: qualquer
-um que abra `data/config.json` passa por cima dela.
-
-![Tela de bloqueio no tema Fallout: o cabeçalho TecCo INDUSTRIES (TM) PROTOCOLO TERMLINK, as tentativas restantes, o despejo de memória em duas colunas de endereços hexadecimais e caracteres embaralhados, e o registro das tentativas à direita](assets/lockscreen.png)
-
-*O cabeçalho traz a marca TecCo — a contraparte da Lumen no tema Fallout. As
-palavras se escondem no despejo (`STORAGE`, `CAPSULE`, `REACTOR`…) e cada erro
-responde com a* semelhança *em vez de uma recusa seca.*
-
 **Aba Controle** — iniciar Modo Trabalho, iniciar Modo Pessoal, limpar cache e
 temporários. Um painel de log mostra cada processo encerrado/iniciado.
 
@@ -138,6 +126,20 @@ a bandeja ao fechar, iniciar bloqueado, papel de parede e restaurar ao padrão.
 *O tema Fallout troca o ciano por fósforo verde e acrescenta o **botão de cadeado**
 (🔒) ao lado da engrenagem — ele só aparece neste tema, porque é o que dá acesso
 ao terminal Termlink.*
+
+**Tela de bloqueio — só no Fallout.** Atrás desse cadeado está o minigame de
+senha do terminal TecCo Termlink: palavras escondidas num despejo de memória,
+quatro tentativas e a dica de *likeness*. Além do cadeado, Ajustes › "Iniciar
+bloqueado" faz a tela aparecer já na próxima abertura.
+
+![Tela de bloqueio no tema Fallout: o cabeçalho TecCo INDUSTRIES (TM) PROTOCOLO TERMLINK, as tentativas restantes, o despejo de memória em duas colunas de endereços hexadecimais e caracteres embaralhados, e o registro das tentativas à direita](assets/lockscreen.png)
+
+*O cabeçalho traz a marca TecCo — a contraparte da Lumen no tema Fallout. As
+palavras se escondem no despejo (`STORAGE`, `CAPSULE`, `REACTOR`…) e cada erro
+responde com a* semelhança *em vez de uma recusa seca.*
+
+⚠️ **É uma brincadeira, não segurança.** Não protege nem esconde nada: qualquer
+um que abra `data/config.json` passa por cima dela.
 
 **Bandeja** — por padrão o X minimiza a janela para a bandeja em vez de encerrar,
 e a saída definitiva fica no menu dela. Desmarcando *"Ao fechar, minimizar para a
