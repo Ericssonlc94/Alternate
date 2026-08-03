@@ -11,7 +11,7 @@ from .main_window import MainWindow
 
 def main():
     app = QApplication(sys.argv)
-    app.setApplicationName("Severance System")
+    app.setApplicationName("Alternate")
 
     # Sem isto, esconder a janela na bandeja encerraria o programa: para o Qt,
     # a última janela visível ter sumido é motivo de saída.
@@ -23,7 +23,7 @@ def main():
     window = MainWindow(translator, config, app)
     window.show()
 
-    # A abertura ROBCO-LUMON roda primeiro; ao terminar, ela mesma decide se cai
+    # A abertura Lumen roda primeiro; ao terminar, ela mesma decide se cai
     # na tela de bloqueio (tema Fallout com `start_locked`) ou direto na interface.
     window.play_intro()
 

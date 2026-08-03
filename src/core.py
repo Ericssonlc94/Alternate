@@ -1,8 +1,8 @@
 """
-Núcleo (engine) do Severance System.
+Núcleo (engine) do Alternate.
 
-Este módulo concentra a lógica que NÃO depende de interface (rich, tkinter, GUI).
-A intenção é que tanto a CLI quanto a futura GUI importem daqui, sem duplicar código.
+Este módulo concentra a lógica que NÃO depende de interface (Qt, terminal, GUI).
+A GUI importa daqui; qualquer outra interface pode fazer o mesmo, sem duplicar código.
 
 Sub-passo 1: camada de dados (paths + leitura/escrita de JSON).
 """
@@ -33,9 +33,9 @@ WALLPAPER_STYLE_MAP = {"1": (10, 0), "2": (6, 0), "3": (2, 0), "4": (0, 1), "5":
 class Reporter:
     """Contrato de eventos entre o núcleo e a camada de apresentação.
 
-    O núcleo NÃO conhece rich, idioma ou GUI. Ele apenas chama estes métodos
+    O núcleo NÃO conhece Qt, idioma ou GUI. Ele apenas chama estes métodos
     passando uma CHAVE (a mesma do dicionário i18n) e dados. Quem implementa
-    (CLI hoje, GUI amanhã) decide como traduzir e exibir.
+    (hoje o `QtReporter` da GUI) decide como traduzir e exibir.
 
     - status: operação em andamento (texto de spinner / barra de status).
     - info:   marco concluído (ex.: "3 processos terminados").
@@ -69,7 +69,7 @@ LOGS_DIR = "logs"
 
 # Usado só no plano B de gravação (ver `_writable_dir`), para nomear a pasta em
 # %APPDATA%. Não é o título da janela — esse vem das traduções.
-APP_NAME = "Severance System"
+APP_NAME = "Alternate"
 
 
 def get_project_root():
@@ -108,7 +108,7 @@ def _writable_dir(name):
 
     Preferência é ao lado do programa — é o modo portátil, e o que vale rodando
     do código-fonte. Instalado numa pasta protegida, gravar ali falharia; nesse
-    caso cai para %APPDATA%\\Severance System\\<name>, que é sempre do usuário.
+    caso cai para %APPDATA%\\Alternate\\<name>, que é sempre do usuário.
     """
     beside = os.path.join(get_project_root(), name)
     if _can_write(beside):

@@ -1,15 +1,15 @@
 > Para ler em português: [README_BR.md](README_BR.md)
 
-# 🌀 Severance System
+# 🌀 Alternate
 
 A Windows tool inspired by the TV series *Severance*. It switches your machine
 between **Work Mode** and **Personal Mode**: closing the previous mode's apps,
 launching the new ones, swapping the wallpaper and clearing temp files.
 
-The project ships **two frontends over a single engine**: a PySide6 GUI (the
-main one) and the original `rich` CLI.
+The interface is a **PySide6 GUI over a standalone engine** — `core.py` knows
+nothing about Qt and talks to the frontend through the `Reporter` contract.
 
-![Severance System boot sequence: the ROBCO-LUMON INDUSTRIES startup with the motto "BUILDING BETTER WORKERS", the mainframe uplink and the credential check](assets/severance%20system%20intro.png)
+![Alternate boot sequence: the LUMEN INDUSTRIES startup with the motto "BUILDING BETTER WORKERS", the mainframe uplink and the credential check](assets/severance%20system%20intro.png)
 
 ---
 
@@ -31,12 +31,13 @@ Severance-System/
 │   └── manual_python_estudo.md
 ├── logs/                    reserved (see "Known limitations")
 ├── packaging/
-│   └── severance_system.spec
+│   ├── severance_gui.spec
+│   ├── installer.iss
+│   └── build_installer.bat
 ├── src/
 │   ├── core.py              engine: processes, wallpaper, registry, cleanup
-│   ├── severance_system.py  CLI frontend (rich)
+│   ├── severance_gui.py     entry point used by the .spec
 │   └── gui/                 graphical frontend (PySide6)
-├── run.bat                  launches the CLI
 ├── run_gui.bat              launches the GUI
 └── requirements.txt
 ```
@@ -83,17 +84,12 @@ venv\Scripts\pip install -r requirements.txt
 
 ## ▶️ Running
 
-| Command | Opens |
-|---|---|
-| `run_gui.bat` | GUI (recommended) — uses `pythonw.exe`, no console behind it |
-| `run.bat` | text-mode CLI |
-
-Manually:
+`run_gui.bat` starts the program — it uses `pythonw.exe`, so no console window
+sits behind the interface. Manually:
 
 ```bash
 cd src
-..\venv\Scripts\python.exe -m gui                # GUI
-..\venv\Scripts\python.exe severance_system.py   # CLI
+..\venv\Scripts\python.exe -m gui
 ```
 
 The working directory is `src\` so that `-m gui` finds the package and
@@ -104,19 +100,25 @@ not depend on it.
 
 ## 🖥️ The graphical interface
 
-**Boot sequence** — the ROBCO-LUMON INDUSTRIES startup, with phosphor glow,
+**Boot sequence** — the LUMEN INDUSTRIES startup, with phosphor glow,
 scanlines and typing effects. Skippable.
 
-**Lock screen** — recreates the ROBCO Termlink password minigame from *Fallout*:
+**Lock screen** — recreates the TecCo Termlink password minigame from *Fallout*:
 words hidden in a memory dump, four attempts, and the *likeness* hint. Enabled
 in Settings › "Start locked".
 ⚠️ **It is a joke, not security.** It protects and hides nothing: anyone who
-opens `data/config.json` or runs the CLI walks straight past it.
+opens `data/config.json` walks straight past it.
+
+![Lock screen in the Fallout theme: the TecCo INDUSTRIES (TM) TERMLINK PROTOCOL header, the attempts left, the memory dump in two columns of hex addresses and garbled characters, and the attempt log on the right](assets/lockscreen.png)
+
+*The header carries the TecCo brand — the Fallout theme's counterpart to Lumen.
+Words hide in the dump (`STORAGE`, `CAPSULE`, `REACTOR`…); each wrong guess
+answers with the* likeness *count instead of a plain rejection.*
 
 **Control tab** — start Work Mode, start Personal Mode, clear cache and temp
 files. A log panel reports every process terminated and launched.
 
-![Main window in the Severance theme: LUMON INDUSTRIES header, Control and Database tabs, the mode buttons, maintenance and the activity log](assets/severance%20system%20menu%20theme%201.png)
+![Main window in the Severance theme: ALTERNATE header, Control and Database tabs, the mode buttons, maintenance and the activity log](assets/severance%20system%20menu%20theme%201.png)
 
 *The active mode is highlighted above the buttons, and the activity log shows
 what the engine is doing in real time.*
@@ -150,26 +152,6 @@ appears once the name is given, followed by *access granted* and the greeting.
 
 No action runs on the UI thread: everything goes through a `Worker` and comes
 back as Qt signals, so the window never freezes during a mode switch.
-
----
-
-## ⌨️ The command-line interface
-
-| Option | Function |
-|---|---|
-| **1** | Start Work Mode |
-| **2** | Start Personal Mode |
-| **3** | Add app to database |
-| **4** | View database |
-| **5** | Delete app from database |
-| **6** | Add wallpaper |
-| **7** | Clear cache/temp files **+ orphan virtual desktops** |
-| **8** | Restore defaults |
-| **9** | Exit |
-| **\*** | Toggle language (pt ⇄ en) |
-
-Editing an app already on record is GUI-only; from the command line the way
-around it is delete and add again.
 
 ---
 
@@ -258,28 +240,30 @@ as e.g. `es.json`.
 
 ## 🧱 Architecture
 
-The engine knows nothing about `rich`, Qt or languages. It reports what it is
-doing through the `core.Reporter` contract, and each frontend implements its own:
+The engine knows nothing about Qt or languages. It reports what it is doing
+through the `core.Reporter` contract, and the frontend implements it:
 
 ```
-severance_system.py ── RichReporter ─┐
-                                     ├─→ core.Reporter ──→ core.py
-gui/ ───────────────── QtReporter ───┘                     (processes, registry,
-                                                            wallpaper, cleanup)
+gui/ ──── QtReporter ──→ core.Reporter ──→ core.py
+                                           (processes, registry,
+                                            wallpaper, cleanup)
 ```
+
+The split is deliberate: another frontend only has to implement `Reporter` —
+`core.py` needs no changes.
 
 | Module in `src/gui/` | Role |
 |---|---|
 | `__main__.py` / `app.py` | entry point (`python -m gui`) |
 | `main_window.py` | `QStackedWidget`: boot → lock → tabs |
-| `boot.py` | ROBCO-LUMON startup sequence |
+| `boot.py` | LUMEN startup sequence |
 | `lockscreen.py` | Termlink terminal minigame |
 | `dialogs.py` | app forms (add and edit), settings and wallpaper forms |
 | `effects.py` | CRT overlay: phosphor, scanlines, sweep |
 | `theme.py` | Severance/Fallout palettes (QSS via `string.Template`) |
 | `sound.py` | async in-memory WAV tones |
 | `reporter.py` | `Worker` + engine → Qt signal bridge |
-| `i18n.py` | runtime translation, stripping `rich` markup |
+| `i18n.py` | runtime translation, stripping the `rich` markup the language files still carry |
 
 ---
 
@@ -289,12 +273,11 @@ The short path is `packaging\build_installer.bat`, which runs both steps and
 reports clearly if anything is missing. Manually:
 
 ```bash
-venv\Scripts\pyinstaller packaging\severance_gui.spec      # GUI -> dist\SeveranceSystem.exe
-venv\Scripts\pyinstaller packaging\severance_system.spec   # CLI -> dist\severance_system.exe
-iscc packaging\installer.iss                               # installer -> dist\...-setup.exe
+venv\Scripts\pyinstaller packaging\severance_gui.spec   # -> dist\Alternate.exe
+iscc packaging\installer.iss                            # installer -> dist\Alternate-2.0.0-setup.exe
 ```
 
-The GUI executable is **~60 MB**: it carries all of Python and PySide6 inside,
+The executable is **~60 MB**: it carries all of Python and PySide6 inside,
 which is why it runs on machines with nothing installed.
 
 The installer needs [Inno Setup 6](https://jrsoftware.org/isdl.php), which is
@@ -302,15 +285,27 @@ free. Without it the `.bat` still produces the executable in `dist\`, which work
 on its own — the installer only adds shortcuts and uninstall support.
 
 **Per-user install, deliberately.** The default target is
-`%LOCALAPPDATA%\Programs\Severance System`, not Program Files. That avoids a UAC
+`%LOCALAPPDATA%\Programs\Alternate`, not Program Files. That avoids a UAC
 prompt at install time and keeps the target writable, so `data/` lives beside the
 executable and the whole folder can be carried to another PC.
 
-**Where the data ends up.** The `.spec` files bundle `assets/` and leave `data/`
+**Where the data ends up.** The `.spec` file bundles `assets/` and leaves `data/`
 out — PyInstaller wipes its temp folder on every exit, so anything written there
 would be lost. If the program still ends up in a protected folder it does not
 break: `core._writable_dir` probes for write access and falls back to
-`%APPDATA%\Severance System\`.
+`%APPDATA%\Alternate\`.
+
+**A fresh install starts empty.** Neither the executable nor the installer
+carries `config.json` or the app databases — the `.spec` leaves `data/` out and
+the installer ships only the `.exe` and the READMEs. With no `user_name` on
+record the boot sequence grants no access and hands over to the enrollment
+screen, so each user defines their own profile.
+
+> The installer uses an `AppId` of its own, different from the old Severance
+> System one. Windows therefore treats Alternate as a separate product: it
+> installs into its own folder and does not inherit the previous install's
+> `data/`. The old entry, if present, stays in Apps & Features and can be
+> uninstalled separately.
 
 Uninstalling preserves `data/` on purpose — updating does not wipe your settings.
 To start clean, delete the folder manually.
@@ -324,13 +319,15 @@ To start clean, delete the folder manually.
   certificate.
 - **`assets/logo.ico` is not in the repository**, so the executable and installer
   ship with the default Windows icon and the GUI draws a themed square instead.
-  The `.spec` files handle its absence without breaking; put the file back in
+  The `.spec` file handles its absence without breaking; put the file back in
   `assets/` and the icon returns (also uncomment `SetupIconFile` in
   `installer.iss`).
 - **`logs/` is unused.** The folder and `core.get_logs_dir()` exist, but the
   project has no logging system — it is scaffolding, not a working feature.
-- **Orphan virtual desktop cleanup is CLI-only** (option 7). The GUI clears
-  cache and temp files but does not call `clean_orphan_virtual_desktops()`.
+- **Orphan virtual desktop cleanup is unreachable.** The CLI was the only caller
+  of `core.clean_orphan_virtual_desktops()`; with it gone, the function is still
+  in the engine but nothing invokes it. The GUI's maintenance button clears cache
+  and temp files only.
 - **Windows only.** `winreg`, `ctypes.windll` and `winsound` have no equivalent
   on other platforms.
 - Temp cleanup skips files locked by the system — seeing several "permission

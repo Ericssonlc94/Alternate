@@ -9,7 +9,7 @@ ser fechado no X e deixaria o menu à mostra por trás, sem nome. Sendo página,
 única saída é responder — que é exatamente a regra pedida.
 
 Respondido o nome, a tela encena a liberação (acesso concedido + saudação) antes
-de emitir `submitted`, no mesmo tom da abertura ROBCO-LUMON.
+de emitir `submitted`, no mesmo tom da abertura Lumen.
 """
 
 from PySide6.QtCore import Qt, QTimer, Signal

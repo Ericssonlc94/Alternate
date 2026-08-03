@@ -1,4 +1,4 @@
-; Instalador do Severance System (Inno Setup 6).
+; Instalador do Alternate (Inno Setup 6).
 ;
 ; Compile a partir da RAIZ do projeto, DEPOIS de gerar o executavel:
 ;     pyinstaller packaging\severance_gui.spec
@@ -12,14 +12,18 @@
 ;   Instalado numa pasta protegida (se alguem mudar o destino para Arquivos de
 ;   Programas), o app nao quebra: core._writable_dir cai para %APPDATA%.
 
-#define AppName "Severance System"
+#define AppName "Alternate"
 #define AppVersion "2.0.0"
 #define AppPublisher "Ericsson"
 #define AppURL "https://github.com/Ericssonlc94/Severance-System"
-#define ExeName "SeveranceSystem.exe"
+#define ExeName "Alternate.exe"
 
 [Setup]
-AppId={{7B3F2A64-9C51-4E0D-9E77-3A5D2C1B8F40}
+; AppId NOVO em relacao ao Severance System: o Alternate e outro produto para o
+; Windows, entao instala em pasta propria e chega zerado (o usuario cadastra o
+; perfil no primeiro uso). Quem tinha o Severance System continua com a entrada
+; antiga em Aplicativos e pode desinstala-la a parte.
+AppId={{8A7E1F44-4D06-49B1-9790-3DDE3A37F3DD}
 AppName={#AppName}
 AppVersion={#AppVersion}
 AppPublisher={#AppPublisher}
@@ -34,7 +38,7 @@ DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
 
 OutputDir=..\dist
-OutputBaseFilename=SeveranceSystem-{#AppVersion}-setup
+OutputBaseFilename=Alternate-{#AppVersion}-setup
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern

@@ -1,7 +1,7 @@
-"""Janela principal do Severance System.
+"""Janela principal do Alternate.
 
 Organização: um `QStackedWidget` alterna entre três páginas — a abertura
-(ROBCO-LUMON), a tela de bloqueio (tema Fallout) e a interface real. A interface
+(Lumen), a tela de bloqueio (o terminal TecCo, do tema Fallout) e a interface
 real são duas abas — controle e banco de dados —, com os ajustes na engrenagem
 do canto superior direito.
 
@@ -240,7 +240,7 @@ class MainWindow(QMainWindow):
     # Abertura
     # ------------------------------------------------------------------
     def play_intro(self):
-        """Mostra a abertura ROBCO-LUMON antes de liberar a interface."""
+        """Mostra a abertura Lumen antes de liberar a interface."""
         self.stack.setCurrentWidget(self.boot_screen)
         self.boot_screen.setFocus()
         self.boot_screen.play(self.config.get("user_name", ""))
@@ -382,7 +382,7 @@ class MainWindow(QMainWindow):
             self._on_unlocked()
 
     def lock(self, startup=False):
-        """Mostra o terminal ROBCO com um quebra-cabeça novo.
+        """Mostra o terminal TecCo com um quebra-cabeça novo.
 
         O enigma da senha é exclusivo do tema Fallout — nos outros temas não há
         o que bloquear.

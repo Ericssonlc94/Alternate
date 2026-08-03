@@ -189,8 +189,8 @@ class CryptoRevealLabel(QLabel):
     """Decodificação caractere a caractere: o texto se firma da esquerda para a
     direita enquanto o resto continua embaralhando.
 
-    É a `crypto_animation` da CLI (que usava `rich.Live`) reescrita sobre um
-    QTimer — mesmo ritmo: 5 embaralhadas por caractere antes de fixá-lo.
+    É a `crypto_animation` que a antiga CLI fazia com `rich.Live`, reescrita
+    sobre um QTimer — mesmo ritmo: 5 embaralhadas por caractere antes de fixá-lo.
     """
 
     finished = Signal()

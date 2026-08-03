@@ -1,4 +1,4 @@
-"""Abertura do sistema: o boot da ROBCO-LUMON INDUSTRIES.
+"""Abertura do sistema: o boot da LUMEN INDUSTRIES.
 
 Recria a sequência que a CLI mostrava (`show_splash_screen` + `crypto_animation`
 + `type_text_effect`) e a funde com a estética de boot corporativo: a marca é
@@ -6,7 +6,7 @@ uma corporação única, não uma parceria — como a Weylan-Yutani da Nostromo,
 Alien, é a fusão de duas casas num só logotipo, com lema abaixo.
 
 A marca e as linhas técnicas ficam em inglês de propósito: é identidade visual
-corporativa, do mesmo modo que o terminal ROBCO. Só o que o sistema *diz* ao
+corporativa, do mesmo modo que o terminal TecCo. Só o que o sistema *diz* ao
 usuário (conectando, credenciais, boas-vindas) é traduzido.
 """
 
@@ -16,13 +16,13 @@ from PySide6.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout, QWidget
 from .effects import CryptoRevealLabel, FadeInLabel, TypewriterLabel, apply_glow
 from .theme import get_theme
 
-BRAND = "ROBCO-LUMON INDUSTRIES"
+BRAND = "LUMEN INDUSTRIES"
 TAGLINE = "BUILDING BETTER WORKERS"
-PRODUCT = "SEVERANCE SYSTEM"
+PRODUCT = "ALTERNATE"
 
-# Ruído técnico de boot, no espírito dos terminais da ROBCO.
+# Ruído técnico de boot, no espírito dos terminais da TecCo.
 BOOT_LINES = [
-    "INITIALIZING ROBCO-LUMON MF BOOT AGENT v2.3.0",
+    "INITIALIZING LUMEN MF BOOT AGENT v2.3.0",
     "RBIOS-4.02.08.00 52EE5.E7.E8",
     "UPLINK XSHK-4 ................. COMPLETE",
 ]

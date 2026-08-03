@@ -1,11 +1,11 @@
 @echo off
-REM Gera o executavel e, em seguida, o instalador do Severance System.
+REM Gera o executavel e, em seguida, o instalador do Alternate.
 REM Rode com um duplo clique ou pelo terminal; funciona de qualquer diretorio.
 setlocal
 cd /d "%~dp0.."
 
 echo ============================================
-echo  Severance System - build do instalador
+echo  Alternate - build do instalador
 echo ============================================
 echo.
 
@@ -26,13 +26,13 @@ if errorlevel 1 (
     exit /b 1
 )
 
-if not exist "dist\SeveranceSystem.exe" (
+if not exist "dist\Alternate.exe" (
     echo.
-    echo [ERRO] dist\SeveranceSystem.exe nao foi produzido.
+    echo [ERRO] dist\Alternate.exe nao foi produzido.
     pause
     exit /b 1
 )
-echo       OK: dist\SeveranceSystem.exe
+echo       OK: dist\Alternate.exe
 echo.
 
 echo [2/2] Compilando o instalador com o Inno Setup...

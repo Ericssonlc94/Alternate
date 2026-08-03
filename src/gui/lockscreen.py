@@ -1,4 +1,4 @@
-"""Tela de bloqueio do tema Fallout: o terminal ROBCO Termlink.
+"""Tela de bloqueio do tema Fallout: o terminal TecCo Termlink.
 
 Reproduz o minigame de senha dos jogos: um despejo de memória com palavras
 escondidas no meio de lixo, quatro tentativas, e a dica de "likeness" (quantos
@@ -114,7 +114,7 @@ class _Puzzle:
 
 
 class FalloutLockScreen(QWidget):
-    """Terminal ROBCO. Emite `unlocked` quando a senha correta é escolhida."""
+    """Terminal TecCo. Emite `unlocked` quando a senha correta é escolhida."""
 
     unlocked = Signal()
 

@@ -1,10 +1,10 @@
 {
     "user_name": "Ericsson",
-    "active_mode": "PESSOAL",
-    "active_mode_key": "personal",
+    "active_mode": "TRABALHO",
+    "active_mode_key": "work",
     "language": "pt",
     "theme": "severance",
-    "start_locked": true,
+    "start_locked": false,
     "sound_enabled": false,
     "close_to_tray": true,
     "work_wallpaper": {

@@ -1,6 +1,4 @@
 pyautogui
-rich
-typer
 psutil
 pygetwindow
 PySide6

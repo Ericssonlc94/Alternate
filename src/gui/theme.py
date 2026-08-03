@@ -15,7 +15,7 @@ from string import Template
 THEMES = {
     "severance": {
         "label_key": "gui_theme_severance",
-        # Azul-petróleo da Lumon: o mesmo #001E29 que a CLI já usava, agora com
+        # Azul-petróleo da Lumen: o mesmo #001E29 que a CLI usava, agora com
         # uma escala de apoio para painéis e bordas.
         "bg": "#001E29",
         "panel": "#00293A",
@@ -106,7 +106,7 @@ QLabel#Heading {
 }
 QLabel#SubHeading { color: $dim; letter-spacing: 2px; }
 
-/* --- Abertura (boot ROBCO-LUMON) --- */
+/* --- Abertura (boot LUMEN) --- */
 QLabel#BootLine { color: $dim; font-size: 13px; letter-spacing: 1px; }
 QLabel#BootBrand {
     color: $accent;

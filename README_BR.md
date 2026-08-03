@@ -1,15 +1,15 @@
 > Read this in English: [README.md](README.md)
 
-# 🌀 Severance System
+# 🌀 Alternate
 
 Ferramenta para Windows inspirada na série *Ruptura*. Alterna o computador entre
 **Modo Trabalho** e **Modo Pessoal**: encerra os aplicativos do modo anterior,
 inicia os do novo, troca o papel de parede e limpa arquivos temporários.
 
-O projeto tem **duas interfaces sobre o mesmo núcleo**: uma GUI em PySide6
-(principal) e a CLI original em `rich`.
+A interface é uma **GUI em PySide6 sobre um núcleo independente** — o `core.py`
+não conhece Qt e conversa com ela pelo contrato `Reporter`.
 
-![Abertura do Severance System: o boot da ROBCO-LUMON INDUSTRIES, com o lema "BUILDING BETTER WORKERS", a conexão ao mainframe e a verificação de credenciais](assets/severance%20system%20intro.png)
+![Abertura do Alternate: o boot da LUMEN INDUSTRIES, com o lema "BUILDING BETTER WORKERS", a conexão ao mainframe e a verificação de credenciais](assets/severance%20system%20intro.png)
 
 ---
 
@@ -31,12 +31,13 @@ Severance-System/
 │   └── manual_python_estudo.md
 ├── logs/                    reservada (ver "Limitações conhecidas")
 ├── packaging/
-│   └── severance_system.spec
+│   ├── severance_gui.spec
+│   ├── installer.iss
+│   └── build_installer.bat
 ├── src/
 │   ├── core.py              motor: processos, wallpaper, registro, limpeza
-│   ├── severance_system.py  interface CLI (rich)
+│   ├── severance_gui.py     ponto de entrada usado pelo .spec
 │   └── gui/                 interface gráfica (PySide6)
-├── run.bat                  abre a CLI
 ├── run_gui.bat              abre a GUI
 └── requirements.txt
 ```
@@ -82,17 +83,12 @@ venv\Scripts\pip install -r requirements.txt
 
 ## ▶️ Como executar
 
-| Comando | O que abre |
-|---|---|
-| `run_gui.bat` | GUI (recomendado) — usa `pythonw.exe`, sem console atrás |
-| `run.bat` | CLI em modo texto |
-
-Manualmente:
+O `run_gui.bat` abre o programa — ele usa `pythonw.exe`, então não fica um
+console atrás da interface. Manualmente:
 
 ```bash
 cd src
-..\venv\Scripts\python.exe -m gui          # GUI
-..\venv\Scripts\python.exe severance_system.py   # CLI
+..\venv\Scripts\python.exe -m gui
 ```
 
 O diretório de trabalho é `src\` para que `-m gui` encontre o pacote e o
@@ -103,19 +99,25 @@ dependem disso.
 
 ## 🖥️ A interface gráfica
 
-**Abertura** — o boot da ROBCO-LUMON INDUSTRIES, com efeito de fósforo,
+**Abertura** — o boot da LUMEN INDUSTRIES, com efeito de fósforo,
 scanlines e digitação. Pode ser pulada.
 
-**Tela de bloqueio** — reproduz o minigame de senha do terminal ROBCO Termlink
+**Tela de bloqueio** — reproduz o minigame de senha do terminal TecCo Termlink
 (*Fallout*): palavras escondidas num despejo de memória, quatro tentativas e a
 dica de *likeness*. Ativável em Ajustes › "Iniciar bloqueado".
 ⚠️ **É uma brincadeira, não segurança.** Não protege nem esconde nada: qualquer
-um que abra `data/config.json` ou rode a CLI passa por cima dela.
+um que abra `data/config.json` passa por cima dela.
+
+![Tela de bloqueio no tema Fallout: o cabeçalho TecCo INDUSTRIES (TM) PROTOCOLO TERMLINK, as tentativas restantes, o despejo de memória em duas colunas de endereços hexadecimais e caracteres embaralhados, e o registro das tentativas à direita](assets/lockscreen.png)
+
+*O cabeçalho traz a marca TecCo — a contraparte da Lumen no tema Fallout. As
+palavras se escondem no despejo (`STORAGE`, `CAPSULE`, `REACTOR`…) e cada erro
+responde com a* semelhança *em vez de uma recusa seca.*
 
 **Aba Controle** — iniciar Modo Trabalho, iniciar Modo Pessoal, limpar cache e
 temporários. Um painel de log mostra cada processo encerrado/iniciado.
 
-![Menu principal no tema Severance: cabeçalho LUMON INDUSTRIES, abas Controle e Banco de Dados, os botões de modo, a manutenção e o registro de atividade](assets/severance%20system%20menu%20theme%201.png)
+![Menu principal no tema Severance: cabeçalho ALTERNATE, abas Controle e Banco de Dados, os botões de modo, a manutenção e o registro de atividade](assets/severance%20system%20menu%20theme%201.png)
 
 *O modo ativo aparece em destaque acima dos botões, e o registro de atividade
 mostra o que o núcleo está fazendo em tempo real.*
@@ -149,26 +151,6 @@ informado, seguido de *acesso concedido* e da saudação.
 
 Nenhuma ação roda na thread da interface: tudo passa por um `Worker`, e os
 eventos voltam como *signals* Qt. A janela não congela durante uma troca de modo.
-
----
-
-## ⌨️ A interface de linha de comando
-
-| Opção | Função |
-|---|---|
-| **1** | Iniciar Modo Trabalho |
-| **2** | Iniciar Modo Pessoal |
-| **3** | Adicionar app ao banco de dados |
-| **4** | Consultar banco de dados |
-| **5** | Excluir app do banco de dados |
-| **6** | Adicionar papel de parede |
-| **7** | Limpar cache/temporários **+ desktops virtuais órfãos** |
-| **8** | Restaurar ao padrão |
-| **9** | Sair |
-| **\*** | Alternar idioma (pt ⇄ en) |
-
-Editar um app já cadastrado existe só na interface gráfica; pela linha de comando
-o caminho é excluir e adicionar de novo.
 
 ---
 
@@ -257,28 +239,30 @@ salve como, por exemplo, `es.json`.
 
 ## 🧱 Arquitetura
 
-O núcleo não conhece `rich`, Qt nem idioma. Ele reporta o que está fazendo
-através do contrato `core.Reporter`, e cada interface implementa o seu:
+O núcleo não conhece Qt nem idioma. Ele reporta o que está fazendo através do
+contrato `core.Reporter`, e a interface o implementa:
 
 ```
-severance_system.py ── RichReporter ─┐
-                                     ├─→ core.Reporter ──→ core.py
-gui/ ───────────────── QtReporter ───┘                     (processos, registro,
-                                                            wallpaper, limpeza)
+gui/ ──── QtReporter ──→ core.Reporter ──→ core.py
+                                           (processos, registro,
+                                            wallpaper, limpeza)
 ```
+
+A separação é proposital: outra interface só precisa implementar o `Reporter` —
+o `core.py` não muda.
 
 | Módulo em `src/gui/` | Papel |
 |---|---|
 | `__main__.py` / `app.py` | ponto de entrada (`python -m gui`) |
 | `main_window.py` | `QStackedWidget`: boot → bloqueio → abas |
-| `boot.py` | abertura ROBCO-LUMON |
+| `boot.py` | abertura LUMEN |
 | `lockscreen.py` | minigame do terminal Termlink |
 | `dialogs.py` | formulários de app (cadastro e edição), ajustes e papel de parede |
 | `effects.py` | overlay CRT: fósforo, scanlines, varredura |
 | `theme.py` | paletas Severance/Fallout (QSS via `string.Template`) |
 | `sound.py` | tons WAV assíncronos em memória |
 | `reporter.py` | `Worker` + ponte núcleo → signals Qt |
-| `i18n.py` | tradução em runtime, limpando a marcação do `rich` |
+| `i18n.py` | tradução em runtime, limpando a marcação do `rich` que os arquivos de idioma ainda carregam |
 
 ---
 
@@ -288,12 +272,11 @@ O caminho curto é `packaging\build_installer.bat`, que faz os dois passos e avi
 com clareza se algo faltar. Manualmente:
 
 ```bash
-venv\Scripts\pyinstaller packaging\severance_gui.spec      # GUI  -> dist\SeveranceSystem.exe
-venv\Scripts\pyinstaller packaging\severance_system.spec   # CLI  -> dist\severance_system.exe
-iscc packaging\installer.iss                               # instalador -> dist\...-setup.exe
+venv\Scripts\pyinstaller packaging\severance_gui.spec   # -> dist\Alternate.exe
+iscc packaging\installer.iss                            # instalador -> dist\Alternate-2.0.0-setup.exe
 ```
 
-O executável da GUI tem **~60 MB**: leva o Python e o PySide6 inteiros dentro de
+O executável tem **~60 MB**: leva o Python e o PySide6 inteiros dentro de
 si, e por isso roda em máquinas sem nada instalado.
 
 O instalador exige o [Inno Setup 6](https://jrsoftware.org/isdl.php), que é
@@ -301,15 +284,26 @@ gratuito. Sem ele, o `.bat` ainda entrega o executável de `dist\`, que já
 funciona sozinho — o instalador só acrescenta atalhos e desinstalação.
 
 **Instalação por usuário, de propósito.** O destino padrão é
-`%LOCALAPPDATA%\Programs\Severance System`, e não Arquivos de Programas. Isso
+`%LOCALAPPDATA%\Programs\Alternate`, e não Arquivos de Programas. Isso
 evita o UAC na instalação e deixa o destino gravável, então `data/` fica ao lado
 do executável e a pasta inteira pode ser levada para outro PC.
 
-**Onde os dados param.** Os `.spec` embarcam `assets/` e mantêm `data/` de fora —
+**Onde os dados param.** O `.spec` embarca `assets/` e mantém `data/` de fora —
 o PyInstaller apaga a pasta temporária a cada saída, então qualquer coisa gravada
 lá se perderia. Se ainda assim o programa acabar numa pasta protegida, ele não
 quebra: `core._writable_dir` testa a escrita e cai para
-`%APPDATA%\Severance System\`.
+`%APPDATA%\Alternate\`.
+
+**Instalação nova começa zerada.** Nem o executável nem o instalador carregam o
+`config.json` ou os bancos de apps — o `.spec` deixa `data/` de fora e o
+instalador leva só o `.exe` e os READMEs. Sem `user_name` gravado, a abertura não
+concede acesso e entrega a tela de cadastro, então cada usuário define o próprio
+perfil.
+
+> O instalador usa um `AppId` próprio, diferente do antigo Severance System. Para
+> o Windows, o Alternate é outro produto: instala em pasta própria e não herda o
+> `data/` da instalação anterior. A entrada antiga, se existir, continua em
+> Aplicativos e pode ser desinstalada à parte.
 
 Desinstalar preserva `data/` de propósito — atualizar não apaga seus ajustes.
 Para zerar, apague a pasta manualmente.
@@ -323,13 +317,15 @@ Para zerar, apague a pasta manualmente.
   Resolver isso exige um certificado de assinatura de código pago.
 - **`assets/logo.ico` não está no repositório**, então o executável e o
   instalador saem com o ícone padrão do Windows e a GUI desenha um quadrado da
-  cor do tema. Os `.spec` tratam a ausência sem quebrar; devolvendo o arquivo a
+  cor do tema. O `.spec` trata a ausência sem quebrar; devolvendo o arquivo a
   `assets/`, o ícone volta sozinho (e basta descomentar `SetupIconFile` no
   `installer.iss`).
 - **`logs/` não é usada por nada.** A pasta e o `core.get_logs_dir()` existem,
   mas o projeto não tem sistema de log — é estrutura pronta, não recurso ativo.
-- **A limpeza de desktops virtuais órfãos só existe na CLI** (opção 7). A GUI
-  limpa cache e temporários, mas não chama `clean_orphan_virtual_desktops()`.
+- **A limpeza de desktops virtuais órfãos ficou inalcançável.** A CLI era a única
+  que chamava `core.clean_orphan_virtual_desktops()`; com ela removida, a função
+  continua no núcleo mas ninguém a invoca. O botão de manutenção da GUI limpa só
+  cache e temporários.
 - **Somente Windows.** `winreg`, `ctypes.windll` e `winsound` não têm equivalente
   nas outras plataformas.
 - A limpeza de temporários ignora arquivos em uso pelo sistema — é esperado ver

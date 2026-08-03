@@ -52,7 +52,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='SeveranceSystem',
+    name='Alternate',
     icon=ICON if has_icon else None,
     debug=False,
     bootloader_ignore_signals=False,
