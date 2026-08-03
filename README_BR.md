@@ -1,5 +1,7 @@
 > Read this in English: [README.md](README.md)
 
+*Os nomes originais foram alterados.
+
 # 🌀 Alternate
 
 Ferramenta para Windows inspirada na série *Ruptura*. Alterna o computador entre
